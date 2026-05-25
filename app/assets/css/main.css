@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --font-mono: ui-monospace, "JetBrains Mono", monospace;
+}
+
+:root {
+  --paper: #f3eee5;
+  --ink: #1a1816;
+  --muted: #7a766c;
+  --accent: #c0563b;
+  --surface: #ede8de;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  background-image: radial-gradient(
+    circle,
+    rgba(26, 24, 22, 0.1) 1px,
+    transparent 1.4px
+  );
+  background-size: 28px 28px;
+  background-position: 0 0;
+  font-family: var(--font-mono);
+  margin: 0;
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.serif-italic {
+  font-family: var(--font-serif);
+  font-style: italic;
+}
