@@ -41,7 +41,7 @@
 <script setup lang="ts">
 import { Pencil } from "lucide-vue-next";
 
-const today = new Date().toLocaleDateString("id-ID", {
+const today = new Date().toLocaleDateString("en-US", {
   weekday: "long",
   year: "numeric",
   month: "long",

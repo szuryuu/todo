@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, message: "API Key not configured" });
   }
 
-  const prompt = `Dari teks berikut, ekstrak daftar task. Kembalikan HANYA JSON array dengan format: [{"title": string, "priority": "low"|"medium"|"high", "dueDate": "YYYY-MM-DD"|null}]. Teks: ${text}`;
+  const prompt = `From the following text, extract a list of tasks. Return ONLY a JSON array in the format: [{"title": string, "priority": "low"|"medium"|"high", "dueDate": "YYYY-MM-DD"|null}]. Text: ${text}`;
 
   const response = await $fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,

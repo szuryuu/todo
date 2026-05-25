@@ -122,9 +122,9 @@ const store = useTaskStore();
 
 const greeting = computed(() => {
   const hour = new Date().getHours();
-  if (hour < 12) return "Selamat Pagi!";
-  if (hour < 15) return "Selamat Siang!";
-  if (hour < 18) return "Selamat Sore!";
-  return "Selamat Malam!";
+  if (hour < 12) return "Good Morning!";
+  if (hour < 15) return "Good Afternoon!";
+  if (hour < 18) return "Good Evening!";
+  return "Good Night!";
 });
 </script>
