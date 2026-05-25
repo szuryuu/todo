@@ -1,71 +1,62 @@
 <template>
   <div
-    class="fixed inset-0 bg-[rgba(26,24,22,0.4)] backdrop-blur-xs flex items-center justify-center p-4 z-50"
+    class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50"
   >
     <div
-      class="bg-[var(--paper)] border border-[var(--ink)] w-full max-w-lg p-6 space-y-6 relative"
+      class="sketchy-box bg-white w-full max-w-2xl p-8 md:p-10 relative -rotate-1"
     >
       <div
-        class="flex justify-between items-center border-b border-[rgba(26,24,22,0.25)] pb-3"
+        class="flex justify-between items-center border-b-2 border-dashed border-[var(--ink)] pb-4 mb-6"
       >
-        <h3 class="text-xl font-serif italic">Detail Task</h3>
+        <h3 class="text-4xl flex items-center gap-3">
+          Edit Task
+          <FileEdit class="w-8 h-8" stroke-width="2.5" />
+        </h3>
         <button
           @click="$emit('close')"
-          class="text-xs uppercase tracking-[0.18em] text-[var(--muted)] hover:text-[var(--ink)]"
+          class="text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
         >
-          Close
+          <X class="w-8 h-8" stroke-width="2.5" />
         </button>
       </div>
 
-      <div class="space-y-4 font-mono text-sm">
-        <div class="space-y-1">
-          <label
-            class="text-[10px] uppercase tracking-[0.18em] text-[var(--muted)] block"
-            >Judul</label
-          >
+      <div class="flex flex-col gap-6 text-2xl">
+        <div>
+          <label class="text-[var(--muted)] block mb-2">Title</label>
           <input
             v-model="editedTask.title"
             type="text"
-            class="w-full bg-transparent border border-[rgba(26,24,22,0.25)] p-2 focus:outline-none focus:border-[var(--ink)]"
+            class="w-full bg-transparent border-b-2 border-[var(--ink)] py-2 focus:outline-none text-3xl"
           />
         </div>
 
-        <div class="space-y-1">
-          <label
-            class="text-[10px] uppercase tracking-[0.18em] text-[var(--muted)] block"
-            >Deskripsi</label
-          >
+        <div>
+          <label class="text-[var(--muted)] block mb-2">Notes</label>
           <textarea
             v-model="editedTask.description"
             rows="3"
-            class="w-full bg-transparent border border-[rgba(26,24,22,0.25)] p-2 focus:outline-none focus:border-[var(--ink)] resize-none"
+            class="w-full bg-[#fef9c3] sketchy-border p-4 focus:outline-none resize-none"
           ></textarea>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div class="space-y-1">
-            <label
-              class="text-[10px] uppercase tracking-[0.18em] text-[var(--muted)] block"
-              >Status</label
-            >
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+          <div>
+            <label class="text-[var(--muted)] block mb-2">Status</label>
             <select
               v-model="editedTask.status"
-              class="w-full bg-[var(--paper)] border border-[rgba(26,24,22,0.25)] p-2 focus:outline-none focus:border-[var(--ink)] uppercase tracking-wider text-xs"
+              class="w-full bg-white sketchy-border px-4 py-2 focus:outline-none cursor-pointer"
             >
-              <option value="todo">Todo</option>
-              <option value="in-progress">In Progress</option>
+              <option value="todo">To-Do</option>
+              <option value="in-progress">Doing</option>
               <option value="done">Done</option>
             </select>
           </div>
 
-          <div class="space-y-1">
-            <label
-              class="text-[10px] uppercase tracking-[0.18em] text-[var(--muted)] block"
-              >Prioritas</label
-            >
+          <div>
+            <label class="text-[var(--muted)] block mb-2">Priority</label>
             <select
               v-model="editedTask.priority"
-              class="w-full bg-[var(--paper)] border border-[rgba(26,24,22,0.25)] p-2 focus:outline-none focus:border-[var(--ink)] uppercase tracking-wider text-xs"
+              class="w-full bg-white sketchy-border px-4 py-2 focus:outline-none cursor-pointer"
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
@@ -74,58 +65,47 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div class="space-y-1">
-            <label
-              class="text-[10px] uppercase tracking-[0.18em] text-[var(--muted)] block"
-              >Tenggat Waktu</label
-            >
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+          <div>
+            <label class="text-[var(--muted)] block mb-2">Deadline</label>
             <input
               v-model="editedTask.dueDate"
               type="date"
-              class="w-full bg-transparent border border-[rgba(26,24,22,0.25)] p-2 focus:outline-none focus:border-[var(--ink)] text-xs"
+              class="w-full bg-white sketchy-border px-4 py-2 focus:outline-none"
             />
           </div>
 
-          <div class="space-y-1">
-            <label
-              class="text-[10px] uppercase tracking-[0.18em] text-[var(--muted)] block"
-              >Tags (pisahkan koma)</label
+          <div>
+            <label class="text-[var(--muted)] block mb-2"
+              >Tags (comma separated)</label
             >
             <input
               v-model="tagsString"
               type="text"
-              class="w-full bg-transparent border border-[rgba(26,24,22,0.25)] p-2 focus:outline-none focus:border-[var(--ink)] text-xs"
-              placeholder="fitur, bug, refactor"
+              class="w-full bg-transparent border-b-2 border-[var(--ink)] py-2 focus:outline-none"
+              placeholder="work, urgent"
             />
           </div>
-        </div>
-
-        <div
-          class="border-t border-[rgba(26,24,22,0.15)] pt-3 grid grid-cols-2 gap-2 text-[10px] text-[var(--muted)] uppercase tracking-wider"
-        >
-          <div>Dibuat: {{ formatDate(task.createdAt) }}</div>
-          <div>Diperbarui: {{ formatDate(task.updatedAt) }}</div>
         </div>
       </div>
 
       <div
-        class="flex justify-between items-center border-t border-[rgba(26,24,22,0.25)] pt-4"
+        class="flex flex-col sm:flex-row justify-between items-center mt-10 pt-6 border-t-2 border-dashed border-[var(--ink)] gap-4"
       >
         <button
           v-if="editedTask.status !== 'done'"
           @click="markAsDone"
-          class="text-xs uppercase tracking-[0.18em] border border-[var(--accent)] text-[var(--accent)] px-4 py-2 hover:bg-[var(--accent)] hover:text-[var(--paper)] transition-colors"
+          class="sketchy-border px-6 py-3 text-[var(--accent)] bg-[#ffe4e6] hover:bg-[#fecdd3] rotate-2 transition-colors flex items-center gap-2"
         >
-          Mark As Done
+          Mark As Done <Check class="w-6 h-6" stroke-width="3" />
         </button>
         <div v-else></div>
 
         <button
           @click="save"
-          class="text-xs uppercase tracking-[0.18em] bg-[var(--ink)] text-[var(--paper)] px-6 py-2 hover:bg-opacity-90 transition-colors"
+          class="sketchy-box px-10 py-3 bg-[var(--ink)] text-[var(--paper)] text-3xl -rotate-1 hover:rotate-0 transition-transform"
         >
-          Simpan
+          Save
         </button>
       </div>
     </div>
@@ -134,12 +114,10 @@
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
+import { FileEdit, X, Check } from "lucide-vue-next";
 import type { Task } from "~/types/task";
 
-const props = defineProps<{
-  task: Task;
-}>();
-
+const props = defineProps<{ task: Task }>();
 const emit = defineEmits<{
   (e: "close"): void;
   (e: "save", updatedTask: Partial<Task>): void;
@@ -157,14 +135,6 @@ watch(
   { deep: true },
 );
 
-function formatDate(isoString: string) {
-  if (!isoString) return "-";
-  return new Date(isoString).toLocaleString("id-ID", {
-    dateStyle: "short",
-    timeStyle: "short",
-  });
-}
-
 function markAsDone() {
   editedTask.value.status = "done";
   save();
@@ -177,10 +147,6 @@ function save() {
         .map((t) => t.trim())
         .filter((t) => t.length > 0)
     : [];
-
-  emit("save", {
-    ...editedTask.value,
-    tags,
-  });
+  emit("save", { ...editedTask.value, tags });
 }
 </script>

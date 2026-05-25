@@ -3,48 +3,46 @@
     draggable="true"
     @dragstart="$emit('dragstart', $event)"
     @click="$emit('click')"
-    class="border border-[rgba(26,24,22,0.15)] p-4 bg-[var(--paper)] cursor-grab active:cursor-grabbing hover:bg-[var(--surface)] transition-colors space-y-3"
+    class="sketchy-box p-5 cursor-grab active:cursor-grabbing group relative transition-transform hover:-translate-y-1.5"
+    :class="bgClass"
   >
-    <div class="flex justify-between items-start gap-2">
-      <h4 class="font-serif italic text-lg leading-tight text-[var(--ink)]">
-        {{ task.title }}
-      </h4>
+    <div class="flex justify-between items-start gap-4 mb-3">
+      <h4 class="text-3xl leading-none pr-8">{{ task.title }}</h4>
       <button
         @click.stop="handleDelete"
-        class="text-xs uppercase tracking-[0.18em] text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
+        class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 text-[var(--muted)] hover:text-[var(--accent)] transition-opacity"
       >
-        &times;
+        <X class="w-7 h-7" stroke-width="2.5" />
       </button>
     </div>
 
     <p
       v-if="task.description"
-      class="text-xs text-[var(--muted)] line-clamp-2 font-mono"
+      class="text-xl text-[var(--muted)] line-clamp-2 mb-4"
     >
       {{ task.description }}
     </p>
 
-    <div
-      class="flex flex-wrap gap-2 items-center text-xs font-mono uppercase tracking-[0.18em]"
-    >
-      <span :class="priorityClass" class="border px-2 py-0.5 text-[10px]">
+    <div class="flex flex-wrap gap-x-5 gap-y-3 items-center text-xl mt-3">
+      <span :class="priorityClass" class="sketchy-border px-3 bg-white/60">
         {{ task.priority }}
       </span>
-
       <span
         v-if="task.dueDate"
-        :class="{ 'text-[var(--accent)] font-bold': isOverdue }"
-        class="text-[var(--muted)] text-[10px]"
+        :class="{
+          'text-[var(--accent)] font-bold decoration-wavy underline': isOverdue,
+        }"
+        class="text-[var(--ink)] flex items-center gap-2"
       >
-        {{ task.dueDate }}
+        <Calendar class="w-5 h-5" stroke-width="2.5" /> {{ task.dueDate }}
       </span>
     </div>
 
-    <div v-if="task.tags && task.tags.length" class="flex flex-wrap gap-1">
+    <div v-if="task.tags && task.tags.length" class="flex flex-wrap gap-2 mt-4">
       <span
         v-for="tag in task.tags"
         :key="tag"
-        class="text-[9px] font-mono uppercase tracking-wider bg-[rgba(26,24,22,0.05)] px-1.5 py-0.5 text-[var(--muted)]"
+        class="text-lg border-2 border-[var(--ink)] px-3 rounded-full border-dashed bg-white/40"
       >
         #{{ tag }}
       </span>
@@ -54,12 +52,10 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { X, Calendar } from "lucide-vue-next";
 import type { Task } from "~/types/task";
 
-const props = defineProps<{
-  task: Task;
-}>();
-
+const props = defineProps<{ task: Task }>();
 const emit = defineEmits<{
   (e: "dragstart", event: DragEvent): void;
   (e: "click"): void;
@@ -75,17 +71,27 @@ const isOverdue = computed(() => {
 const priorityClass = computed(() => {
   switch (props.task.priority) {
     case "high":
-      return "border-[var(--accent)] text-[var(--accent)] bg-[rgba(192,86,59,0.05)]";
+      return "text-[var(--accent)]";
     case "medium":
-      return "border-[var(--ink)] text-[var(--ink)]";
+      return "text-[var(--ink)] font-bold";
     default:
-      return "border-[rgba(26,24,22,0.2)] text-[var(--muted)]";
+      return "text-[var(--muted)]";
+  }
+});
+
+const bgClass = computed(() => {
+  if (props.task.status === "done") return "bg-[#f1f5f9]";
+  switch (props.task.priority) {
+    case "high":
+      return "bg-[#ffe4e6]";
+    case "medium":
+      return "bg-white";
+    default:
+      return "bg-white";
   }
 });
 
 function handleDelete() {
-  if (confirm("Hapus task ini?")) {
-    emit("delete");
-  }
+  if (confirm("Throw away this task? 🗑️")) emit("delete");
 }
 </script>

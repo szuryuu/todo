@@ -1,31 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap");
 @import "tailwindcss";
 
 @theme {
-  --font-serif: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
-  --font-mono: ui-monospace, "JetBrains Mono", monospace;
+  --font-hand: "Kalam", cursive;
 }
 
 :root {
-  --paper: #f3eee5;
-  --ink: #1a1816;
-  --muted: #7a766c;
-  --accent: #c0563b;
-  --surface: #ede8de;
+  --paper: #fdfbf7;
+  --ink: #2b2e35;
+  --muted: #6b7280;
+  --accent: #e11d48;
+  --highlight: rgba(253, 224, 71, 0.6);
 }
 
 body {
   background-color: var(--paper);
   color: var(--ink);
-  background-image: radial-gradient(
-    circle,
-    rgba(26, 24, 22, 0.1) 1px,
-    transparent 1.4px
-  );
-  background-size: 28px 28px;
-  background-position: 0 0;
-  font-family: var(--font-mono);
+  font-family: var(--font-hand);
   margin: 0;
   min-height: 100vh;
+  font-size: 1.25rem;
+  line-height: 32px;
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 31px,
+    rgba(0, 0, 0, 0.08) 31px,
+    rgba(0, 0, 0, 0.08) 32px
+  );
+  background-attachment: local;
 }
 
 h1,
@@ -33,8 +35,24 @@ h2,
 h3,
 h4,
 h5,
-h6,
-.serif-italic {
-  font-family: var(--font-serif);
-  font-style: italic;
+h6 {
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.sketchy-border {
+  border: 2px solid var(--ink);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+}
+
+.sketchy-box {
+  border: 2px solid var(--ink);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+  box-shadow: 4px 4px 0px 0px rgba(43, 46, 53, 0.9);
+  background-color: var(--paper);
+}
+
+.sketchy-box:active:not(:disabled) {
+  box-shadow: 1px 1px 0px 0px rgba(43, 46, 53, 0.9);
+  transform: translateY(3px) translateX(3px);
 }
