@@ -1,91 +1,165 @@
 <template>
-  <div class="flex flex-col flex-1 gap-6 sm:gap-8">
-    <section
-      class="flex flex-col sm:flex-row justify-between items-start sm:items-end typewriter-border-b pb-4 sm:pb-6 gap-4"
+  <div class="flex flex-col h-full gap-8">
+    <header
+      class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-[rgba(26,20,8,0.18)] pb-6"
     >
       <div>
-        <p
-          class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)] mb-2 uppercase"
+        <span
+          class="font-mono text-[10px] tracking-[0.22em] text-[var(--muted)] uppercase block mb-2"
+          >Active Pipeline</span
         >
-          Active Pipeline
-        </p>
-        <h1 class="text-3xl sm:text-4xl text-[var(--ink)] leading-tight">
+        <h1
+          class="text-4xl font-bold text-[var(--ink)] uppercase tracking-tight"
+        >
           Kanban Board
         </h1>
       </div>
-      <div>
-        <span
-          class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)] uppercase"
-          >TOTAL: {{ store.tasks.length }}</span
-        >
-      </div>
-    </section>
 
-    <div
-      class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 flex-1 items-start"
-    >
       <div
-        v-for="column in columns"
-        :key="column.status"
-        @dragover.prevent
-        @drop="handleDrop(column.status)"
-        class="flex flex-col min-h-[400px] md:min-h-[600px] typewriter-border bg-[var(--surface)] p-2"
+        class="flex flex-wrap items-center gap-4 font-mono text-[10px] uppercase tracking-[0.22em]"
       >
         <div
-          class="p-3 typewriter-border-b flex justify-between items-center mb-4 bg-[var(--paper)]"
+          class="flex items-center border border-[rgba(26,20,8,0.18)] bg-[var(--surface)] p-0.5"
         >
-          <h2
-            class="font-mono text-xs sm:text-sm tracking-[0.22em] text-[var(--ink)] font-bold uppercase"
+          <button
+            @click="filterContext = 'all'"
+            :class="
+              filterContext === 'all'
+                ? 'bg-[var(--ink)] text-[var(--paper)] font-bold'
+                : 'text-[var(--muted)] hover:text-[var(--ink)]'
+            "
+            class="px-3 py-1.5 transition-colors"
           >
-            {{ column.name }}
-          </h2>
-          <div class="flex items-center gap-3 sm:gap-4">
-            <span
-              class="font-mono text-[8px] sm:text-[10px] text-[var(--muted)] tracking-[0.22em]"
+            ALL
+          </button>
+          <button
+            @click="filterContext = 'campus'"
+            :class="
+              filterContext === 'campus'
+                ? 'bg-[var(--ink)] text-[var(--paper)] font-bold'
+                : 'text-[var(--muted)] hover:text-[var(--ink)]'
+            "
+            class="px-3 py-1.5 transition-colors"
+          >
+            CAMPUS
+          </button>
+          <button
+            @click="filterContext = 'work'"
+            :class="
+              filterContext === 'work'
+                ? 'bg-[var(--ink)] text-[var(--paper)] font-bold'
+                : 'text-[var(--muted)] hover:text-[var(--ink)]'
+            "
+            class="px-3 py-1.5 transition-colors"
+          >
+            WORK
+          </button>
+          <button
+            @click="filterContext = 'personal'"
+            :class="
+              filterContext === 'personal'
+                ? 'bg-[var(--ink)] text-[var(--paper)] font-bold'
+                : 'text-[var(--muted)] hover:text-[var(--ink)]'
+            "
+            class="px-3 py-1.5 transition-colors"
+          >
+            PERSONAL
+          </button>
+        </div>
+        <div
+          class="flex items-center border border-[rgba(26,20,8,0.18)] bg-[var(--surface)] p-0.5"
+        >
+          <button
+            @click="filterEnergy = 'all'"
+            :class="
+              filterEnergy === 'all'
+                ? 'bg-[var(--ink)] text-[var(--paper)] font-bold'
+                : 'text-[var(--muted)] hover:text-[var(--ink)]'
+            "
+            class="px-3 py-1.5 transition-colors"
+          >
+            ALL ENERGY
+          </button>
+          <button
+            @click="filterEnergy = 'light'"
+            :class="
+              filterEnergy === 'light'
+                ? 'bg-[var(--ink)] text-[var(--paper)] font-bold'
+                : 'text-[var(--muted)] hover:text-[var(--ink)]'
+            "
+            class="px-3 py-1.5 transition-colors"
+          >
+            LIGHT
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div
+      class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-start flex-1"
+    >
+      <div
+        v-for="col in columns"
+        :key="col.status"
+        class="flex flex-col gap-4 min-h-[500px]"
+        @dragover.prevent
+        @dragenter.prevent
+        @drop="handleDrop($event, col.status)"
+      >
+        <div
+          class="flex items-center justify-between border-b-2 border-[var(--ink)] pb-3"
+        >
+          <div class="flex items-center gap-3">
+            <h2
+              class="font-bold text-[var(--ink)] text-lg uppercase tracking-widest"
             >
-              [{{ store.tasksByStatus(column.status).length }}]
-            </span>
-            <button
-              @click="toggleQuickAdd(column.status)"
-              class="font-mono text-xs sm:text-sm text-[var(--ink)] hover:text-[var(--accent)] transition-colors py-1 px-2 sm:p-0"
+              {{ col.name }}
+            </h2>
+            <span class="font-mono text-xs text-[var(--muted)]"
+              >[{{ getTasks(col.status).length }}]</span
             >
-              [+]
-            </button>
           </div>
+          <button
+            @click="toggleQuickAdd(col.status)"
+            class="text-[var(--ink)] hover:text-[var(--accent)] transition-colors p-1"
+          >
+            <Plus :size="20" stroke-width="2" />
+          </button>
         </div>
 
         <div
-          v-if="quickAddColumn === column.status"
-          class="mb-4 typewriter-border bg-[var(--paper)] p-3 sm:p-4"
+          v-if="quickAddColumn === col.status"
+          class="border border-[rgba(26,20,8,0.18)] bg-[var(--surface)] p-4"
         >
           <input
             v-model="quickTitle"
             type="text"
-            placeholder="Type task..."
-            class="w-full bg-transparent typewriter-border-b pb-2 mb-4 text-base sm:text-lg text-[var(--ink)] focus:outline-none placeholder:text-[var(--muted)]"
-            @keyup.enter="submitQuickAdd(column.status)"
+            placeholder="Type task target..."
+            class="w-full bg-transparent text-[var(--ink)] text-lg outline-none placeholder-[var(--muted)] mb-4"
+            @keyup.enter="submitQuickAdd(col.status)"
+            autofocus
           />
           <div
-            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4"
+            class="flex items-center justify-between border-t border-[rgba(26,20,8,0.18)] pt-3"
           >
             <select
               v-model="quickPriority"
-              class="w-full sm:w-auto bg-transparent font-mono text-[10px] tracking-[0.22em] text-[var(--ink)] focus:outline-none uppercase"
+              class="bg-transparent font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--ink)] outline-none cursor-pointer"
             >
               <option value="low">LOW</option>
               <option value="medium">MEDIUM</option>
               <option value="high">HIGH</option>
             </select>
-            <div class="flex gap-3 sm:gap-4 w-full sm:w-auto justify-end">
+            <div class="flex items-center gap-4">
               <button
                 @click="quickAddColumn = null"
-                class="font-mono text-[10px] tracking-[0.22em] text-[var(--muted)] py-1"
+                class="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--muted)] hover:text-[var(--ink)] transition-colors"
               >
                 CANCEL
               </button>
               <button
-                @click="submitQuickAdd(column.status)"
-                class="font-mono text-[10px] tracking-[0.22em] bg-[var(--ink)] text-[var(--paper)] px-3 py-1 font-bold"
+                @click="submitQuickAdd(col.status)"
+                class="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--paper)] bg-[var(--ink)] px-4 py-1.5 hover:bg-[var(--accent)] transition-colors font-bold"
               >
                 ADD
               </button>
@@ -93,42 +167,56 @@
           </div>
         </div>
 
-        <div class="space-y-3 sm:space-y-4 flex-1 overflow-y-auto px-1 pb-4">
-          <TaskCard
-            v-for="task in store.tasksByStatus(column.status)"
-            :key="task.id"
-            :task="task"
-            @dragstart="handleDragStart(task.id)"
-            @click="openTask(task)"
-            @delete="store.deleteTask(task.id)"
-          />
+        <div class="flex flex-col gap-4">
           <div
-            v-if="store.tasksByStatus(column.status).length === 0"
-            class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)] text-center py-8 opacity-60"
+            v-for="task in getTasks(col.status)"
+            :key="task.id"
+            draggable="true"
+            @dragstart="handleDragStart($event, task.id)"
+            class="cursor-grab active:cursor-grabbing"
           >
-            [ EMPTY ]
+            <TaskCard
+              :task="task"
+              @click="openModal(task)"
+              @delete="store.deleteTask(task.id)"
+            />
+          </div>
+          <div
+            v-if="getTasks(col.status).length === 0"
+            class="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--muted)] text-center py-8 opacity-60"
+          >
+            [ EMPTY ZONE ]
           </div>
         </div>
       </div>
     </div>
 
     <TaskModal
-      v-if="selectedTask"
+      :is-open="isModalOpen"
       :task="selectedTask"
-      @close="selectedTask = null"
-      @save="handleSaveTask"
+      @close="closeModal"
+      @save="closeModal"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import { Plus } from "lucide-vue-next";
 import { useTaskStore } from "~/stores/task";
-import type { Task, TaskStatus, TaskPriority } from "~/types/task";
+import type {
+  Task,
+  TaskStatus,
+  TaskPriority,
+  TaskContext,
+  TaskEnergy,
+} from "~/types/task";
 import TaskCard from "~/components/task/TaskCard.vue";
 import TaskModal from "~/components/task/TaskModal.vue";
 
 const store = useTaskStore();
+const filterContext = ref<TaskContext | "all">("all");
+const filterEnergy = ref<TaskEnergy | "all">("all");
 
 const columns: { name: string; status: TaskStatus }[] = [
   { name: "TODO", status: "todo" },
@@ -138,28 +226,52 @@ const columns: { name: string; status: TaskStatus }[] = [
 
 const draggedTaskId = ref<string | null>(null);
 const selectedTask = ref<Task | null>(null);
+const isModalOpen = ref(false);
 const quickAddColumn = ref<TaskStatus | null>(null);
 const quickTitle = ref("");
 const quickPriority = ref<TaskPriority>("medium");
 
-function handleDragStart(id: string) {
+const filteredTasks = computed(() => {
+  return store.activeTasks.filter((t) => {
+    const matchContext =
+      filterContext.value === "all" || t.context === filterContext.value;
+    const matchEnergy =
+      filterEnergy.value === "all" || t.energy === filterEnergy.value;
+    return matchContext && matchEnergy;
+  });
+});
+
+function getTasks(status: TaskStatus) {
+  return filteredTasks.value.filter((t) => t.status === status);
+}
+
+function handleDragStart(event: DragEvent, id: string) {
   draggedTaskId.value = id;
-}
-function handleDrop(status: TaskStatus) {
-  if (draggedTaskId.value) {
-    store.updateTask(draggedTaskId.value, { status });
-    draggedTaskId.value = null;
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", id);
   }
 }
-function openTask(task: Task) {
+
+function handleDrop(event: DragEvent, status: TaskStatus) {
+  const taskId =
+    draggedTaskId.value || event.dataTransfer?.getData("text/plain");
+  if (taskId) {
+    store.updateTask(taskId, { status });
+  }
+  draggedTaskId.value = null;
+}
+
+function openModal(task: Task) {
   selectedTask.value = task;
+  isModalOpen.value = true;
 }
-function handleSaveTask(updatedFields: Partial<Task>) {
-  if (selectedTask.value) {
-    store.updateTask(selectedTask.value.id, updatedFields);
-    selectedTask.value = null;
-  }
+
+function closeModal() {
+  selectedTask.value = null;
+  isModalOpen.value = false;
 }
+
 function toggleQuickAdd(status: TaskStatus) {
   if (quickAddColumn.value === status) {
     quickAddColumn.value = null;
@@ -169,6 +281,7 @@ function toggleQuickAdd(status: TaskStatus) {
     quickPriority.value = "medium";
   }
 }
+
 function submitQuickAdd(status: TaskStatus) {
   if (!quickTitle.value.trim()) return;
   store.addTask({
@@ -177,8 +290,8 @@ function submitQuickAdd(status: TaskStatus) {
     status: status,
     bucket: "active",
     energy: "light",
-    description: "",
-    tags: [],
+    context: "none",
+    subtasks: [],
     dueDate: null,
   });
   quickAddColumn.value = null;

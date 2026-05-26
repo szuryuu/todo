@@ -1,142 +1,147 @@
 <template>
   <div
-    class="fixed inset-0 bg-[var(--paper)]/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 z-50"
+    v-if="isOpen"
+    class="fixed inset-0 z-50 bg-[var(--paper)]/95 backdrop-blur flex items-center justify-center p-4 sm:p-6"
+    @click.self="close"
   >
     <div
-      class="typewriter-border bg-[var(--paper)] w-full max-w-2xl relative shadow-2xl flex flex-col max-h-[90vh]"
+      class="w-full max-w-2xl bg-[var(--paper)] typewriter-border p-6 sm:p-8 max-h-[90vh] overflow-y-auto custom-scrollbar"
     >
-      <div
-        class="p-4 sm:p-6 typewriter-border-b flex justify-between items-center bg-[var(--surface)] shrink-0"
-      >
-        <span
-          class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--ink)] font-bold uppercase"
-          >EDIT ITEM RECORD</span
+      <div class="flex justify-between items-start mb-6">
+        <h2
+          class="text-2xl font-bold text-[var(--ink)] uppercase tracking-tight"
         >
+          TARGET DETAILS
+        </h2>
         <button
-          @click="$emit('close')"
-          class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)] hover:text-[var(--ink)] py-1"
+          @click="close"
+          class="text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
         >
-          [ CLOSE ]
+          <X :size="24" />
         </button>
       </div>
 
-      <div class="p-4 sm:p-8 flex flex-col gap-6 sm:gap-8 overflow-y-auto">
-        <div>
+      <div class="flex flex-col gap-6">
+        <div class="flex flex-col gap-2">
           <label
-            class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)] uppercase block mb-2"
+            class="font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]"
             >TITLE</label
           >
           <input
-            v-model="editedTask.title"
+            v-model="form.title"
             type="text"
-            class="w-full bg-transparent typewriter-border-b pb-2 text-xl sm:text-2xl text-[var(--ink)] focus:outline-none"
+            class="w-full bg-transparent border-b border-[var(--ink)]/30 focus:border-[var(--ink)] outline-none py-2 text-lg font-bold text-[var(--ink)] transition-colors"
           />
         </div>
 
-        <div>
+        <div class="flex flex-col gap-2">
           <label
-            class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)] uppercase block mb-2"
-            >NEXT ACTION</label
+            class="font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]"
+            >NEXT ACTION (MICRO-STEP)</label
           >
           <input
-            v-model="editedTask.nextAction"
+            v-model="form.nextAction"
             type="text"
-            class="w-full bg-transparent typewriter-border-b pb-2 font-mono text-[10px] sm:text-sm text-[var(--ink)] focus:outline-none placeholder:text-[var(--muted)]"
-            placeholder="Concrete next step..."
+            class="w-full bg-transparent border-b border-[var(--ink)]/30 focus:border-[var(--ink)] outline-none py-2 font-mono text-sm text-[var(--ink)] italic transition-colors"
+            placeholder="Langkah konkret pertama..."
           />
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-          <div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="flex flex-col gap-2">
             <label
-              class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)] uppercase block mb-2"
-              >STATUS</label
+              class="font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]"
+              >CONTEXT</label
             >
             <select
-              v-model="editedTask.status"
-              class="w-full bg-[var(--surface)] typewriter-border px-3 sm:px-4 py-2 sm:py-3 font-mono text-[10px] sm:text-sm text-[var(--ink)] focus:outline-none tracking-[0.22em] uppercase"
+              v-model="form.context"
+              class="w-full bg-transparent border-b border-[var(--ink)]/30 focus:border-[var(--ink)] outline-none py-2 font-mono text-sm text-[var(--ink)] uppercase tracking-widest cursor-pointer"
             >
-              <option value="todo">TODO</option>
-              <option value="in-progress">IN PROGRESS</option>
-              <option value="done">DONE</option>
+              <option value="none">NONE</option>
+              <option value="campus">CAMPUS</option>
+              <option value="work">WORK</option>
+              <option value="personal">PERSONAL</option>
             </select>
           </div>
-          <div>
+          <div class="flex flex-col gap-2">
             <label
-              class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)] uppercase block mb-2"
-              >BUCKET</label
+              class="font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]"
+              >ENERGY LEVEL</label
             >
             <select
-              v-model="editedTask.bucket"
-              class="w-full bg-[var(--surface)] typewriter-border px-3 sm:px-4 py-2 sm:py-3 font-mono text-[10px] sm:text-sm text-[var(--ink)] focus:outline-none tracking-[0.22em] uppercase"
-            >
-              <option value="active">ACTIVE</option>
-              <option value="inbox">INBOX</option>
-              <option value="someday">SOMEDAY</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div>
-            <label
-              class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)] uppercase block mb-2"
-              >PRIORITY</label
-            >
-            <select
-              v-model="editedTask.priority"
-              class="w-full bg-[var(--surface)] typewriter-border px-3 sm:px-4 py-2 sm:py-3 font-mono text-[10px] sm:text-sm text-[var(--ink)] focus:outline-none tracking-[0.22em] uppercase"
-            >
-              <option value="low">LOW</option>
-              <option value="medium">MEDIUM</option>
-              <option value="high">HIGH</option>
-            </select>
-          </div>
-          <div>
-            <label
-              class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)] uppercase block mb-2"
-              >ENERGY</label
-            >
-            <select
-              v-model="editedTask.energy"
-              class="w-full bg-[var(--surface)] typewriter-border px-3 sm:px-4 py-2 sm:py-3 font-mono text-[10px] sm:text-sm text-[var(--ink)] focus:outline-none tracking-[0.22em] uppercase"
+              v-model="form.energy"
+              class="w-full bg-transparent border-b border-[var(--ink)]/30 focus:border-[var(--ink)] outline-none py-2 font-mono text-sm text-[var(--ink)] uppercase tracking-widest cursor-pointer"
             >
               <option value="light">LIGHT</option>
               <option value="heavy">HEAVY</option>
             </select>
           </div>
-          <div>
-            <label
-              class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)] uppercase block mb-2"
-              >DEADLINE</label
-            >
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label
+            class="font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]"
+            >MICRO-TASKS</label
+          >
+          <div class="flex gap-2">
             <input
-              v-model="editedTask.dueDate"
-              type="date"
-              class="w-full bg-[var(--surface)] typewriter-border px-3 sm:px-4 py-2 sm:py-3 font-mono text-[10px] sm:text-sm text-[var(--ink)] focus:outline-none tracking-[0.22em] uppercase"
+              v-model="newSubtask"
+              @keyup.enter="addSubtask"
+              type="text"
+              class="flex-1 bg-transparent border-b border-[var(--ink)]/30 focus:border-[var(--ink)] outline-none py-2 font-mono text-sm text-[var(--ink)]"
+              placeholder="Tambah sub-task..."
             />
+            <button
+              @click="addSubtask"
+              class="px-4 border border-[var(--ink)] font-mono text-xs uppercase tracking-widest hover:bg-[var(--ink)] hover:text-[var(--paper)] transition-colors"
+            >
+              ADD
+            </button>
+          </div>
+          <div class="flex flex-col gap-2 mt-2">
+            <div
+              v-for="sub in form.subtasks"
+              :key="sub.id"
+              class="flex items-start gap-3 font-mono text-sm"
+            >
+              <button
+                @click="sub.isDone = !sub.isDone"
+                class="text-[var(--ink)] hover:text-[var(--accent)] transition-colors mt-0.5"
+              >
+                <span v-if="sub.isDone">[x]</span>
+                <span v-else>[ ]</span>
+              </button>
+              <span
+                :class="{ 'line-through text-[var(--muted)]': sub.isDone }"
+                class="flex-1 leading-snug"
+                >{{ sub.title }}</span
+              >
+              <button
+                @click="removeSubtask(sub.id)"
+                class="text-[var(--muted)] hover:text-[var(--accent)]"
+              >
+                <X :size="14" />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div
-        class="p-4 sm:p-6 typewriter-border-t flex flex-col-reverse sm:flex-row justify-between items-center gap-4 bg-[var(--surface)] shrink-0"
-      >
-        <button
-          v-if="editedTask.status !== 'done'"
-          @click="markAsDone"
-          class="w-full sm:w-auto text-center font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--accent)] hover:underline font-bold py-2 sm:py-0"
+        <div
+          class="flex items-center justify-end gap-4 mt-4 pt-6 border-t border-[var(--ink)]/10"
         >
-          [ MARK AS DONE ]
-        </button>
-        <div v-else class="hidden sm:block"></div>
-
-        <button
-          @click="save"
-          class="w-full sm:w-auto text-center bg-[var(--ink)] text-[var(--paper)] px-8 py-3 font-mono text-[10px] sm:text-xs tracking-[0.22em] font-bold hover:bg-[var(--accent)] transition-colors"
-        >
-          SAVE RECORD
-        </button>
+          <button
+            @click="close"
+            class="px-6 py-2 border border-transparent font-mono text-xs uppercase tracking-widest text-[var(--muted)] hover:text-[var(--ink)] transition-colors"
+          >
+            CANCEL
+          </button>
+          <button
+            @click="save"
+            class="px-6 py-2 border border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)] font-mono text-xs uppercase tracking-widest font-bold hover:bg-transparent hover:text-[var(--ink)] transition-colors"
+          >
+            SAVE TARGET
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -144,30 +149,55 @@
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import type { Task } from "~/types/task";
+import { X } from "lucide-vue-next";
+import { useTaskStore } from "~/stores/task";
+import type { Task, Subtask } from "~/types/task";
 
-const props = defineProps<{ task: Task }>();
-const emit = defineEmits<{
-  (e: "close"): void;
-  (e: "save", updatedTask: Partial<Task>): void;
-}>();
+const props = defineProps<{ isOpen: boolean; task: Task | null }>();
+const emit = defineEmits(["close", "save"]);
 
-const editedTask = ref<Partial<Task>>({ ...props.task });
+const form = ref<Partial<Task>>({ subtasks: [] });
+const newSubtask = ref("");
 
 watch(
   () => props.task,
-  (newTask) => {
-    editedTask.value = { ...newTask };
+  (newVal) => {
+    if (newVal) {
+      form.value = {
+        ...newVal,
+        subtasks: newVal.subtasks
+          ? JSON.parse(JSON.stringify(newVal.subtasks))
+          : [],
+      };
+    }
   },
-  { deep: true },
+  { deep: true, immediate: true },
 );
 
-function markAsDone() {
-  editedTask.value.status = "done";
-  save();
-}
+const addSubtask = () => {
+  if (!newSubtask.value.trim()) return;
+  if (!form.value.subtasks) form.value.subtasks = [];
+  form.value.subtasks.push({
+    id: crypto.randomUUID(),
+    title: newSubtask.value.trim(),
+    isDone: false,
+  });
+  newSubtask.value = "";
+};
 
-function save() {
-  emit("save", { ...editedTask.value });
-}
+const removeSubtask = (id: string) => {
+  if (form.value.subtasks) {
+    form.value.subtasks = form.value.subtasks.filter((s) => s.id !== id);
+  }
+};
+
+const close = () => emit("close");
+const save = () => {
+  if (props.task) {
+    const store = useTaskStore();
+    store.updateTask(props.task.id, { ...form.value });
+  }
+  emit("save");
+  close();
+};
 </script>

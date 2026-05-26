@@ -5,6 +5,25 @@
       <h1 class="text-4xl text-[var(--ink)]">Focus Timer</h1>
     </div>
 
+    <div
+      v-if="pomodoroStore.phase === 'idle'"
+      class="flex items-center gap-4 font-mono text-sm tracking-[0.22em] mt-4"
+    >
+      <button
+        v-for="d in [25, 45, 60]"
+        :key="d"
+        @click="pomodoroStore.setWorkDuration(d)"
+        :class="[
+          'px-4 py-2 border transition-colors',
+          pomodoroStore.workDurationMinutes === d
+            ? 'border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)] font-bold'
+            : 'border-[var(--ink)]/30 text-[var(--muted)] hover:border-[var(--ink)] hover:text-[var(--ink)]',
+        ]"
+      >
+        {{ d }}M
+      </button>
+    </div>
+
     <div class="relative mt-8">
       <svg width="340" height="340" class="-rotate-90">
         <circle
@@ -53,11 +72,18 @@
 
     <div class="flex flex-wrap justify-center gap-6 mt-8">
       <button
-        v-if="!isRunning && pomodoroStore.phase === 'idle' && activeTask"
-        @click="startTimer(activeTask.id)"
+        v-if="!isRunning && pomodoroStore.phase === 'idle'"
+        @click="startTimer(activeTask?.id)"
         class="font-mono text-xs tracking-[0.22em] bg-[var(--ink)] text-[var(--paper)] px-8 py-4 font-bold hover:bg-[var(--accent)] transition-colors"
       >
         START SESSION
+      </button>
+      <button
+        v-if="!isRunning && pomodoroStore.phase !== 'idle'"
+        @click="startTimer()"
+        class="font-mono text-xs tracking-[0.22em] bg-[var(--ink)] text-[var(--paper)] px-8 py-4 font-bold hover:bg-[var(--accent)] transition-colors"
+      >
+        RESUME
       </button>
       <button
         v-if="isRunning"
@@ -84,7 +110,6 @@ import { usePomodoroStore } from "~/stores/pomodoro";
 import { useTaskStore } from "~/stores/task";
 import { usePomodoro } from "~/composables/usePomodoro";
 import {
-  POMODORO_WORK_MINUTES,
   POMODORO_SHORT_BREAK_MINUTES,
   POMODORO_LONG_BREAK_MINUTES,
 } from "~/utils/constants";
@@ -92,6 +117,7 @@ import {
 const route = useRoute();
 const pomodoroStore = usePomodoroStore();
 const taskStore = useTaskStore();
+
 const { isRunning, startTimer, pauseTimer, interruptTimer } = usePomodoro();
 
 const activeTask = computed(() => {
@@ -100,12 +126,13 @@ const activeTask = computed(() => {
 });
 
 const totalSecondsInPhase = computed(() => {
-  if (pomodoroStore.phase === "work") return POMODORO_WORK_MINUTES * 60;
+  if (pomodoroStore.phase === "work")
+    return (pomodoroStore.workDurationMinutes || 25) * 60;
   if (pomodoroStore.phase === "short-break")
     return POMODORO_SHORT_BREAK_MINUTES * 60;
   if (pomodoroStore.phase === "long-break")
     return POMODORO_LONG_BREAK_MINUTES * 60;
-  return POMODORO_WORK_MINUTES * 60;
+  return (pomodoroStore.workDurationMinutes || 25) * 60;
 });
 
 const dashOffset = computed(() => {
@@ -116,8 +143,12 @@ const dashOffset = computed(() => {
 });
 
 const formattedTime = computed(() => {
-  if (pomodoroStore.phase === "idle" && !pomodoroStore.secondsLeft)
-    return "25:00";
+  if (pomodoroStore.phase === "idle" && !pomodoroStore.secondsLeft) {
+    const m = (pomodoroStore.workDurationMinutes || 25)
+      .toString()
+      .padStart(2, "0");
+    return `${m}:00`;
+  }
   const m = Math.floor(pomodoroStore.secondsLeft / 60)
     .toString()
     .padStart(2, "0");

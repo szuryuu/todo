@@ -9,8 +9,7 @@ export const useTaskStore = defineStore("task", {
   }),
   getters: {
     inboxTasks: (state) => state.tasks.filter((t) => t.bucket === "inbox"),
-    activeTasks: (state) =>
-      state.tasks.filter((t) => t.bucket === "active" && t.status !== "done"),
+    activeTasks: (state) => state.tasks.filter((t) => t.bucket === "active"),
     somedayTasks: (state) => state.tasks.filter((t) => t.bucket === "someday"),
     tasksByStatus: (state) => (status: TaskStatus) =>
       state.tasks.filter((t) => t.bucket === "active" && t.status === status),
@@ -44,11 +43,22 @@ export const useTaskStore = defineStore("task", {
       }
     },
     addTask(
-      task: Omit<Task, "id" | "createdAt" | "updatedAt" | "pomodoroCount">,
+      task: Omit<
+        Task,
+        | "id"
+        | "createdAt"
+        | "updatedAt"
+        | "pomodoroCount"
+        | "context"
+        | "subtasks"
+      > &
+        Partial<Pick<Task, "context" | "subtasks">>,
     ) {
       const now = new Date().toISOString();
       this.tasks.push({
         ...task,
+        context: task.context || "none",
+        subtasks: task.subtasks || [],
         id: crypto.randomUUID(),
         pomodoroCount: 0,
         createdAt: now,

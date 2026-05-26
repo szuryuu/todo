@@ -2,7 +2,6 @@ import { ref } from "vue";
 import { usePomodoroStore } from "~/stores/pomodoro";
 import { useTaskStore } from "~/stores/task";
 import {
-  POMODORO_WORK_MINUTES,
   POMODORO_SHORT_BREAK_MINUTES,
   POMODORO_LONG_BREAK_MINUTES,
   POMODORO_SESSIONS_BEFORE_LONG_BREAK,
@@ -19,10 +18,12 @@ export function usePomodoro() {
     if (taskId) {
       store.activeTaskId = taskId;
       store.phase = "work";
-      store.secondsLeft = POMODORO_WORK_MINUTES * 60;
+      store.secondsLeft = (store.workDurationMinutes || 25) * 60;
     }
-    if (store.phase === "idle") return;
-
+    if (store.phase === "idle") {
+      store.phase = "work";
+      store.secondsLeft = (store.workDurationMinutes || 25) * 60;
+    }
     isRunning.value = true;
     timerInterval = setInterval(() => {
       if (store.secondsLeft > 0) {
@@ -60,7 +61,6 @@ export function usePomodoro() {
     if (Notification.permission === "granted") {
       new Notification("Pomodoro Timer", { body: "Phase completed!" });
     }
-
     if (store.phase === "work") {
       store.sessionCount++;
       if (store.activeTaskId) {
@@ -69,7 +69,7 @@ export function usePomodoro() {
           id: crypto.randomUUID(),
           taskId: store.activeTaskId,
           startedAt: new Date(
-            Date.now() - POMODORO_WORK_MINUTES * 60000,
+            Date.now() - (store.workDurationMinutes || 25) * 60000,
           ).toISOString(),
           completedAt: new Date().toISOString(),
           interrupted: false,
@@ -95,7 +95,7 @@ export function usePomodoro() {
       .padStart(2, "0");
     const s = (store.secondsLeft % 60).toString().padStart(2, "0");
     const task = taskStore.tasks.find((t) => t.id === store.activeTaskId);
-    document.title = `${m}:${s} — ${task?.title || store.phase}`;
+    document.title = `${m}:${s} - ${task?.title || store.phase}`;
   }
 
   return { isRunning, startTimer, pauseTimer, interruptTimer };
