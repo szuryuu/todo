@@ -148,10 +148,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
 import { X } from "lucide-vue-next";
 import { useTaskStore } from "~/stores/task";
-import type { Task, Subtask } from "~/types/task";
+import type { Task } from "~/types/task";
 
 const props = defineProps<{ isOpen: boolean; task: Task | null }>();
 const emit = defineEmits(["close", "save"]);

@@ -164,6 +164,7 @@
 
 <script setup lang="ts">
 import { Menu, X } from "lucide-vue-next";
+import { useTaskStore } from "~/stores/task";
 
 const store = useTaskStore();
 const today = new Date().toISOString().split("T")[0];

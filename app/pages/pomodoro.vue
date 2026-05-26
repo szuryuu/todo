@@ -104,11 +104,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
 import { usePomodoroStore } from "~/stores/pomodoro";
 import { useTaskStore } from "~/stores/task";
-import { usePomodoro } from "~/composables/usePomodoro";
 import {
   POMODORO_SHORT_BREAK_MINUTES,
   POMODORO_LONG_BREAK_MINUTES,

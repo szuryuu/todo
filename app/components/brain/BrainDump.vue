@@ -11,13 +11,11 @@
         >AI MODEL: GEMINI 2.0</span
       >
     </div>
-
     <textarea
       v-model="text"
       class="w-full flex-1 min-h-[250px] bg-transparent border-none p-2 text-xl text-[var(--ink)] placeholder:text-[var(--muted)] placeholder:opacity-50 focus:outline-none resize-none leading-relaxed"
       placeholder="Tulis semua yang ada di pikiranmu..."
     ></textarea>
-
     <div class="flex justify-end pt-6 typewriter-border-t">
       <button
         @click="parseTasks"
@@ -27,14 +25,12 @@
         {{ loading ? "PARSING..." : "PISAHKAN" }}
       </button>
     </div>
-
     <div
       v-if="error"
       class="mt-4 p-4 typewriter-border text-[var(--accent)] font-mono text-xs tracking-[0.22em] uppercase"
     >
       [ ERR: {{ error }} ]
     </div>
-
     <div
       v-if="parsedTasks.length > 0"
       class="mt-8 pt-6 typewriter-border-t flex flex-col"
@@ -95,7 +91,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import { useTaskStore } from "~/stores/task";
 
 const text = ref("");
@@ -129,6 +124,8 @@ function addToInbox() {
       dueDate: task.dueDate || null,
       status: "todo",
       bucket: "inbox",
+      context: "none",
+      subtasks: [],
       description: "",
       tags: [],
     });

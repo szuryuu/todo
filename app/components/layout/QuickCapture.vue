@@ -6,7 +6,6 @@
     >
       [+] CAPTURE
     </button>
-
     <div
       v-if="isOpen"
       class="fixed inset-0 bg-[var(--paper)]/90 z-50 flex items-center justify-center p-6 backdrop-blur-sm"
@@ -44,7 +43,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted, onUnmounted } from "vue";
 import { useTaskStore } from "~/stores/task";
 
 const store = useTaskStore();
@@ -69,6 +67,7 @@ function handleKeydown(e: KeyboardEvent) {
 onMounted(() => {
   document.addEventListener("keydown", handleKeydown);
 });
+
 onUnmounted(() => {
   document.removeEventListener("keydown", handleKeydown);
 });
@@ -81,6 +80,8 @@ function submit() {
     priority: "medium",
     energy: "light",
     bucket: "inbox",
+    context: "none",
+    subtasks: [],
     dueDate: null,
     tags: [],
   });

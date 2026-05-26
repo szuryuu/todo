@@ -1,4 +1,3 @@
-import { ref } from "vue";
 import { usePomodoroStore } from "~/stores/pomodoro";
 import { useTaskStore } from "~/stores/task";
 import {

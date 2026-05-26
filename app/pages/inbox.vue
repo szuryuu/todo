@@ -27,7 +27,6 @@
         >
           Captured Items [{{ store.inboxTasks.length }}]
         </h3>
-
         <div class="flex-1 overflow-y-auto space-y-6 pr-2">
           <div
             v-for="task in store.inboxTasks"
@@ -46,9 +45,7 @@
                 [X]
               </button>
             </div>
-
             <h4 class="text-xl text-[var(--ink)] mb-6">{{ task.title }}</h4>
-
             <div class="flex flex-wrap gap-4 pt-4 typewriter-border-t">
               <button
                 @click="store.updateTask(task.id, { bucket: 'active' })"
@@ -64,7 +61,6 @@
               </button>
             </div>
           </div>
-
           <div
             v-if="store.inboxTasks.length === 0"
             class="text-center py-12 font-mono text-xs tracking-[0.22em] text-[var(--muted)] opacity-70"
@@ -79,7 +75,6 @@
 
 <script setup lang="ts">
 import { useTaskStore } from "~/stores/task";
-import BrainDump from "~/components/brain/BrainDump.vue";
 
 const store = useTaskStore();
 </script>

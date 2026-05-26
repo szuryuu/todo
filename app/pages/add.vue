@@ -70,9 +70,8 @@
         <NuxtLink
           to="/"
           class="font-mono text-xs tracking-[0.22em] text-[var(--muted)] hover:text-[var(--ink)] transition-colors"
+          >[ ABORT ]</NuxtLink
         >
-          [ ABORT ]
-        </NuxtLink>
         <button
           @click="handleSubmit"
           class="font-mono text-xs tracking-[0.22em] bg-[var(--ink)] text-[var(--paper)] px-8 py-3 font-bold hover:bg-[var(--accent)] transition-colors"
@@ -85,7 +84,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
 import { useTaskStore } from "~/stores/task";
 import type { TaskPriority, TaskEnergy } from "~/types/task";
 
@@ -111,8 +109,8 @@ function handleSubmit() {
     energy: energy.value,
     status: "todo",
     bucket: "active",
-    description: "",
-    tags: [],
+    context: "none",
+    subtasks: [],
   });
   router.push("/kanban");
 }

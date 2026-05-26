@@ -92,8 +92,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import { useRouter } from "vue-router";
 import { Play, Trash2, Timer } from "lucide-vue-next";
 import { usePomodoroStore } from "~/stores/pomodoro";
 import type { Task } from "~/types/task";
