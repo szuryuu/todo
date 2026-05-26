@@ -4,20 +4,29 @@
       class="w-full typewriter-border-b bg-[var(--paper)]/90 backdrop-blur sticky top-0 z-40"
     >
       <div
-        class="max-w-7xl mx-auto px-6 h-16 flex flex-col md:flex-row items-center justify-between gap-4"
+        class="max-w-7xl mx-auto px-4 sm:px-6 min-h-[4rem] py-4 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6"
       >
-        <div class="flex items-center gap-4">
-          <span
-            class="font-mono text-xs tracking-[0.25em] text-[var(--accent)] stamp-accent"
-            >ACTIVE FILE</span
-          >
-          <span class="text-2xl font-bold tracking-tight text-[var(--ink)]"
-            >SZURYUU.TODO</span
-          >
+        <div class="flex items-center justify-between w-full md:w-auto gap-4">
+          <div class="flex items-center gap-3 sm:gap-4">
+            <span
+              class="font-mono text-[10px] sm:text-xs tracking-[0.25em] text-[var(--accent)] stamp-accent"
+              >ACTIVE</span
+            >
+            <span
+              class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--ink)]"
+              >SZURYUU</span
+            >
+          </div>
+          <div class="flex md:hidden">
+            <span
+              class="font-mono text-[10px] tracking-[0.22em] text-[var(--muted)]"
+              >{{ today }}</span
+            >
+          </div>
         </div>
 
         <nav
-          class="flex items-center gap-6 font-mono text-xs tracking-[0.22em] text-[var(--muted)]"
+          class="flex items-center gap-4 sm:gap-6 font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)] w-full md:w-auto overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden whitespace-nowrap pb-1 md:pb-0"
         >
           <NuxtLink
             to="/"
@@ -57,28 +66,32 @@
           >
         </nav>
 
-        <div class="flex items-center gap-4 hidden lg:flex">
+        <div class="items-center gap-4 hidden md:flex">
           <span
-            class="font-mono text-xs tracking-[0.22em] text-[var(--muted)]"
+            class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)]"
             >{{ today }}</span
           >
         </div>
       </div>
     </header>
 
-    <main class="max-w-7xl w-full mx-auto px-6 py-12 flex-1 flex flex-col">
+    <main
+      class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 flex-1 flex flex-col"
+    >
       <NuxtPage />
     </main>
 
-    <footer class="w-full typewriter-border-t py-6 mt-12 text-center">
+    <footer class="w-full typewriter-border-t py-6 mt-8 sm:mt-12 text-center">
       <div
-        class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4"
+        class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-4"
       >
-        <p class="font-mono text-xs tracking-[0.22em] text-[var(--muted)]">
+        <p
+          class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)]"
+        >
           TYPEWRITER PROTOCOL // 2026
         </p>
         <p
-          class="font-mono text-xs tracking-[0.22em] text-[var(--muted)] text-right"
+          class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)] sm:text-right"
         >
           PAGE <span class="text-[var(--ink)] font-bold">01</span>
         </p>

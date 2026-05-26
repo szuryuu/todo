@@ -1,47 +1,53 @@
 <template>
-  <div class="flex flex-col flex-1 gap-8">
-    <section class="flex justify-between items-end typewriter-border-b pb-6">
+  <div class="flex flex-col flex-1 gap-6 sm:gap-8">
+    <section
+      class="flex flex-col sm:flex-row justify-between items-start sm:items-end typewriter-border-b pb-4 sm:pb-6 gap-4"
+    >
       <div>
         <p
-          class="font-mono text-xs tracking-[0.22em] text-[var(--muted)] mb-2 uppercase"
+          class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)] mb-2 uppercase"
         >
           Active Pipeline
         </p>
-        <h1 class="text-4xl text-[var(--ink)] leading-tight">Kanban Board</h1>
+        <h1 class="text-3xl sm:text-4xl text-[var(--ink)] leading-tight">
+          Kanban Board
+        </h1>
       </div>
       <div>
         <span
-          class="font-mono text-xs tracking-[0.22em] text-[var(--muted)] uppercase"
+          class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)] uppercase"
           >TOTAL: {{ store.tasks.length }}</span
         >
       </div>
     </section>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 flex-1 items-start">
+    <div
+      class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 flex-1 items-start"
+    >
       <div
         v-for="column in columns"
         :key="column.status"
         @dragover.prevent
         @drop="handleDrop(column.status)"
-        class="flex flex-col min-h-[600px] typewriter-border bg-[var(--surface)] p-2"
+        class="flex flex-col min-h-[400px] md:min-h-[600px] typewriter-border bg-[var(--surface)] p-2"
       >
         <div
           class="p-3 typewriter-border-b flex justify-between items-center mb-4 bg-[var(--paper)]"
         >
           <h2
-            class="font-mono text-sm tracking-[0.22em] text-[var(--ink)] font-bold uppercase"
+            class="font-mono text-xs sm:text-sm tracking-[0.22em] text-[var(--ink)] font-bold uppercase"
           >
             {{ column.name }}
           </h2>
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3 sm:gap-4">
             <span
-              class="font-mono text-[10px] text-[var(--muted)] tracking-[0.22em]"
+              class="font-mono text-[8px] sm:text-[10px] text-[var(--muted)] tracking-[0.22em]"
             >
               [{{ store.tasksByStatus(column.status).length }}]
             </span>
             <button
               @click="toggleQuickAdd(column.status)"
-              class="font-mono text-sm text-[var(--ink)] hover:text-[var(--accent)] transition-colors"
+              class="font-mono text-xs sm:text-sm text-[var(--ink)] hover:text-[var(--accent)] transition-colors py-1 px-2 sm:p-0"
             >
               [+]
             </button>
@@ -50,28 +56,30 @@
 
         <div
           v-if="quickAddColumn === column.status"
-          class="mb-4 typewriter-border bg-[var(--paper)] p-4"
+          class="mb-4 typewriter-border bg-[var(--paper)] p-3 sm:p-4"
         >
           <input
             v-model="quickTitle"
             type="text"
             placeholder="Type task..."
-            class="w-full bg-transparent typewriter-border-b pb-2 mb-4 text-lg text-[var(--ink)] focus:outline-none placeholder:text-[var(--muted)]"
+            class="w-full bg-transparent typewriter-border-b pb-2 mb-4 text-base sm:text-lg text-[var(--ink)] focus:outline-none placeholder:text-[var(--muted)]"
             @keyup.enter="submitQuickAdd(column.status)"
           />
-          <div class="flex justify-between items-center">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4"
+          >
             <select
               v-model="quickPriority"
-              class="bg-transparent font-mono text-[10px] tracking-[0.22em] text-[var(--ink)] focus:outline-none uppercase"
+              class="w-full sm:w-auto bg-transparent font-mono text-[10px] tracking-[0.22em] text-[var(--ink)] focus:outline-none uppercase"
             >
               <option value="low">LOW</option>
               <option value="medium">MEDIUM</option>
               <option value="high">HIGH</option>
             </select>
-            <div class="flex gap-4">
+            <div class="flex gap-3 sm:gap-4 w-full sm:w-auto justify-end">
               <button
                 @click="quickAddColumn = null"
-                class="font-mono text-[10px] tracking-[0.22em] text-[var(--muted)]"
+                class="font-mono text-[10px] tracking-[0.22em] text-[var(--muted)] py-1"
               >
                 CANCEL
               </button>
@@ -85,7 +93,7 @@
           </div>
         </div>
 
-        <div class="space-y-4 flex-1 overflow-y-auto px-1 pb-4">
+        <div class="space-y-3 sm:space-y-4 flex-1 overflow-y-auto px-1 pb-4">
           <TaskCard
             v-for="task in store.tasksByStatus(column.status)"
             :key="task.id"
@@ -96,7 +104,7 @@
           />
           <div
             v-if="store.tasksByStatus(column.status).length === 0"
-            class="font-mono text-xs tracking-[0.22em] text-[var(--muted)] text-center py-8 opacity-60"
+            class="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[var(--muted)] text-center py-8 opacity-60"
           >
             [ EMPTY ]
           </div>
