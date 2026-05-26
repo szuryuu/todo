@@ -3,75 +3,87 @@
     draggable="true"
     @dragstart="$emit('dragstart', $event)"
     @click="$emit('click')"
-    class="border border-zinc-800 bg-zinc-900/40 p-4 relative overflow-hidden sketchy-border hover:border-amber-500/50 hover:bg-zinc-900/80 transition-colors cursor-grab active:cursor-grabbing group"
+    class="typewriter-border bg-[var(--paper)] p-5 relative cursor-grab active:cursor-grabbing hover:bg-[var(--surface)] transition-colors group"
   >
-    <div class="flex justify-between items-start mb-3">
-      <div class="flex gap-2 items-center">
+    <div class="flex justify-between items-start mb-4">
+      <div class="flex gap-3">
         <span
-          class="font-mono text-[9px] text-zinc-400 border border-zinc-700 px-1.5 py-0.5 sketchy-border bg-zinc-950 uppercase"
-          >{{ task.priority }}</span
+          class="font-mono text-[10px] tracking-[0.22em] text-[var(--ink)] uppercase"
+          >[{{ task.priority }}]</span
         >
         <span
-          class="font-mono text-[9px] text-zinc-400 border border-zinc-700 px-1.5 py-0.5 sketchy-border bg-zinc-950 uppercase"
-          >{{ task.energy }}</span
+          class="font-mono text-[10px] tracking-[0.22em] text-[var(--ink)] uppercase"
+          >[{{ task.energy }}]</span
         >
       </div>
       <button
         @click.stop="handleDelete"
-        class="opacity-0 group-hover:opacity-100 font-hand text-[10px] text-red-500 hover:text-red-400 transition-opacity bg-red-500/10 px-2 py-0.5 sketchy-border"
+        class="opacity-0 group-hover:opacity-100 font-mono text-[10px] tracking-[0.22em] text-[var(--accent)] hover:underline"
       >
-        rm
+        DROP
       </button>
     </div>
 
-    <h3 class="font-sans font-medium text-zinc-200 text-sm leading-snug">
-      {{ task.title }}
+    <h3
+      class="text-xl text-[var(--ink)] leading-snug"
+      :class="{ 'line-through text-[var(--muted)]': task.status === 'done' }"
+    >
+      <span class="font-mono mr-2">{{
+        task.status === "done" ? "[x]" : "[ ]"
+      }}</span
+      >{{ task.title }}
     </h3>
 
     <div
-      v-if="task.nextAction"
-      class="mt-4 relative p-3 border border-amber-500/20 bg-amber-500/5 sketchy-border"
+      v-if="task.nextAction && task.status !== 'done'"
+      class="mt-4 pt-3 typewriter-border-t"
     >
       <span
-        class="absolute -top-2 left-2 font-hand text-[9px] text-amber-500 bg-zinc-950 px-1"
-        >Next Instruction</span
+        class="font-mono text-[9px] tracking-[0.22em] text-[var(--muted)] uppercase block mb-1"
+        >NEXT ACTION:</span
       >
-      <p class="font-hand text-xs text-zinc-300">↳ {{ task.nextAction }}</p>
+      <p class="font-mono text-xs text-[var(--ink)]">
+        >> {{ task.nextAction }}
+      </p>
     </div>
 
-    <div
-      class="flex justify-between items-end mt-4 pt-3 border-t border-zinc-800 sketchy-border"
-    >
-      <div class="flex flex-wrap gap-1">
+    <div class="flex justify-between items-end mt-6">
+      <div class="flex flex-wrap gap-2">
         <span
           v-for="tag in task.tags"
           :key="tag"
-          class="font-mono text-[9px] text-zinc-500 bg-zinc-950 px-1 sketchy-border"
+          class="font-mono text-[9px] tracking-[0.22em] text-[var(--muted)] uppercase"
           >#{{ tag }}</span
         >
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-3">
         <span
           v-if="task.pomodoroCount > 0"
-          class="font-mono text-[9px] text-amber-500 bg-amber-500/10 px-1 sketchy-border border border-amber-500/20"
+          class="font-mono text-[9px] tracking-[0.22em] text-[var(--accent)] font-bold"
         >
-          CYCLES: {{ task.pomodoroCount }}
+          POM: {{ task.pomodoroCount }}
         </span>
         <span
           v-if="task.dueDate"
-          :class="{ 'text-red-400': isOverdue, 'text-zinc-500': !isOverdue }"
-          class="font-mono text-[9px]"
+          :class="{
+            'text-[var(--accent)] font-bold': isOverdue,
+            'text-[var(--muted)]': !isOverdue,
+          }"
+          class="font-mono text-[9px] tracking-[0.22em]"
         >
-          {{ task.dueDate }}
+          DUE: {{ task.dueDate }}
         </span>
       </div>
     </div>
 
+    <span v-if="isStale" class="stamp-accent text-[8px] absolute right-4 top-4">
+      STALE
+    </span>
     <span
-      v-if="isStale"
-      class="absolute right-2 top-1/2 -translate-y-1/2 font-hand text-[10px] text-amber-500 opacity-80 -rotate-90 origin-right pointer-events-none"
+      v-if="task.status === 'done'"
+      class="stamp-muted text-[10px] absolute right-4 top-1/2 -translate-y-1/2 opacity-50"
     >
-      ⚠️ STALE
+      DONE
     </span>
   </div>
 </template>
@@ -104,6 +116,6 @@ const isStale = computed(() => {
 });
 
 function handleDelete() {
-  if (confirm("DESTROY NODE?")) emit("delete");
+  if (confirm("Drop task permanently?")) emit("delete");
 }
 </script>

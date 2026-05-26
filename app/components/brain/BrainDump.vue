@@ -1,67 +1,71 @@
 <template>
-  <div class="flex flex-col h-full gap-4">
+  <div class="flex flex-col h-full">
     <div
-      class="flex justify-between items-center border-b border-zinc-800 pb-3 sketchy-border"
+      class="pb-4 typewriter-border-b flex justify-between items-center mb-6"
     >
-      <h3 class="font-hand text-lg font-bold text-zinc-200">
-        AI Telemetry Parser
-      </h3>
       <span
-        class="font-mono text-[10px] text-amber-500 bg-amber-500/10 px-2 py-0.5 border border-amber-500/20 sketchy-border"
-        >Gemini 2.0 Node</span
+        class="font-mono text-xs tracking-[0.22em] text-[var(--ink)] font-bold uppercase"
+        >Raw Input</span
+      >
+      <span class="font-mono text-[10px] tracking-[0.22em] text-[var(--muted)]"
+        >AI MODEL: GEMINI 2.0</span
       >
     </div>
 
     <textarea
       v-model="text"
-      class="w-full flex-1 min-h-[200px] bg-zinc-950 border border-zinc-800 p-4 font-mono text-sm text-zinc-300 placeholder:text-zinc-700 focus:outline-none focus:border-amber-500/50 resize-none leading-relaxed sketchy-border"
-      placeholder="Dump unstructured thoughts, logs, and tasks here. The parser will split them into discrete actionable nodes..."
+      class="w-full flex-1 min-h-[250px] bg-transparent border-none p-2 text-xl text-[var(--ink)] placeholder:text-[var(--muted)] placeholder:opacity-50 focus:outline-none resize-none leading-relaxed"
+      placeholder="Tulis semua yang ada di pikiranmu..."
     ></textarea>
 
-    <div class="flex justify-end">
+    <div class="flex justify-end pt-6 typewriter-border-t">
       <button
         @click="parseTasks"
         :disabled="loading || !text"
-        class="font-hand text-sm bg-amber-500 text-zinc-950 px-6 py-2 font-bold sketchy-border hover:bg-amber-400 disabled:opacity-50 transition-colors"
+        class="bg-[var(--ink)] text-[var(--paper)] px-8 py-3 font-mono text-xs tracking-[0.22em] font-bold hover:bg-[var(--accent)] disabled:opacity-50 transition-colors"
       >
-        {{ loading ? "Running Parser..." : "Execute Parsing Sequence" }}
+        {{ loading ? "PARSING..." : "PISAHKAN" }}
       </button>
     </div>
 
     <div
       v-if="error"
-      class="border border-red-500/50 bg-red-500/10 text-red-400 p-3 font-mono text-xs sketchy-border mt-2"
+      class="mt-4 p-4 typewriter-border text-[var(--accent)] font-mono text-xs tracking-[0.22em] uppercase"
     >
-      [ERR] {{ error }}
+      [ ERR: {{ error }} ]
     </div>
 
     <div
       v-if="parsedTasks.length > 0"
-      class="mt-4 border-t border-zinc-800 pt-4 sketchy-border"
+      class="mt-8 pt-6 typewriter-border-t flex flex-col"
     >
-      <h4 class="font-hand text-sm text-zinc-400 mb-3">Extracted Nodes:</h4>
-      <div class="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+      <div
+        class="mb-4 font-mono text-xs tracking-[0.22em] text-[var(--ink)] font-bold uppercase"
+      >
+        EXTRACTED RESULTS
+      </div>
+      <div class="space-y-4">
         <div
           v-for="(pt, idx) in parsedTasks"
           :key="idx"
-          class="border border-zinc-800 bg-zinc-950 p-3 sketchy-border flex flex-col gap-3"
+          class="p-5 typewriter-border bg-[var(--paper)] flex flex-col gap-4"
         >
           <input
             v-model="pt.title"
-            class="w-full bg-transparent border-b border-zinc-800 pb-1 font-sans text-sm text-zinc-200 focus:outline-none focus:border-amber-500 transition-colors"
+            class="w-full bg-transparent typewriter-border-b pb-2 text-xl text-[var(--ink)] focus:outline-none"
           />
-          <div class="flex flex-wrap gap-2 items-center">
+          <div class="flex flex-wrap gap-4 items-center mt-2">
             <select
               v-model="pt.priority"
-              class="bg-zinc-900 border border-zinc-700 px-2 py-1 font-mono text-[10px] text-zinc-400 focus:outline-none sketchy-border"
+              class="bg-[var(--surface)] typewriter-border px-2 py-1 font-mono text-[10px] text-[var(--ink)] tracking-[0.22em] uppercase focus:outline-none"
             >
               <option value="low">LOW</option>
-              <option value="medium">MED</option>
+              <option value="medium">MEDIUM</option>
               <option value="high">HIGH</option>
             </select>
             <select
               v-model="pt.energy"
-              class="bg-zinc-900 border border-zinc-700 px-2 py-1 font-mono text-[10px] text-zinc-400 focus:outline-none sketchy-border"
+              class="bg-[var(--surface)] typewriter-border px-2 py-1 font-mono text-[10px] text-[var(--ink)] tracking-[0.22em] uppercase focus:outline-none"
             >
               <option value="light">LIGHT</option>
               <option value="heavy">HEAVY</option>
@@ -69,22 +73,22 @@
             <input
               type="date"
               v-model="pt.dueDate"
-              class="bg-zinc-900 border border-zinc-700 px-2 py-1 font-mono text-[10px] text-zinc-400 focus:outline-none sketchy-border"
+              class="bg-[var(--surface)] typewriter-border px-2 py-1 font-mono text-[10px] text-[var(--ink)] tracking-[0.22em] uppercase focus:outline-none"
             />
             <button
               @click="parsedTasks.splice(idx, 1)"
-              class="font-hand text-[10px] text-red-500 hover:text-red-400 ml-auto"
+              class="ml-auto font-mono text-[10px] tracking-[0.22em] text-[var(--accent)] hover:underline"
             >
-              Discard
+              DROP
             </button>
           </div>
         </div>
       </div>
       <button
         @click="addToInbox"
-        class="w-full mt-4 font-hand text-sm bg-zinc-200 text-zinc-950 px-4 py-2 font-bold sketchy-border hover:bg-white transition-colors"
+        class="w-full mt-6 typewriter-border bg-[var(--surface)] text-[var(--ink)] px-6 py-4 font-mono text-xs tracking-[0.22em] font-bold hover:bg-[var(--paper)] transition-colors"
       >
-        Commit All to Inbox
+        KIRIM KE INBOX
       </button>
     </div>
   </div>
@@ -110,7 +114,7 @@ async function parseTasks() {
     });
     parsedTasks.value = Array.isArray(res) ? res : [];
   } catch (err: any) {
-    error.value = err.message || "Parser Encountered Critical Error";
+    error.value = err.message || "PARSE FAILURE";
   } finally {
     loading.value = false;
   }

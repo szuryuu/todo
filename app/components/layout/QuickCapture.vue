@@ -2,26 +2,28 @@
   <div>
     <button
       @click="isOpen = true"
-      class="fixed bottom-8 right-8 border border-zinc-100 bg-zinc-100 text-zinc-950 px-4 py-3 font-mono text-xs tracking-widest uppercase hover:bg-zinc-200 transition-colors z-50"
+      class="fixed bottom-8 right-8 bg-[var(--ink)] text-[var(--paper)] px-4 py-3 font-mono text-xs tracking-[0.22em] font-bold hover:bg-[var(--accent)] transition-colors z-50"
     >
       [+] CAPTURE
     </button>
 
     <div
       v-if="isOpen"
-      class="fixed inset-0 bg-zinc-950/90 z-50 flex items-center justify-center p-6 backdrop-blur-none"
+      class="fixed inset-0 bg-[var(--paper)]/90 z-50 flex items-center justify-center p-6 backdrop-blur-sm"
       @click.self="isOpen = false"
     >
-      <div class="border border-zinc-700 bg-zinc-900 w-full max-w-2xl">
+      <div
+        class="typewriter-border bg-[var(--paper)] w-full max-w-2xl shadow-xl"
+      >
         <div
-          class="p-6 border-b border-zinc-800 flex justify-between bg-zinc-950"
+          class="p-6 typewriter-border-b flex justify-between bg-[var(--surface)]"
         >
           <span
-            class="font-mono text-xs text-zinc-500 tracking-widest uppercase"
-            >QUICK CAPTURE // CTRL+SPACE</span
+            class="font-mono text-xs tracking-[0.22em] text-[var(--ink)] font-bold uppercase"
+            >QUICK ENTRY</span
           >
           <span
-            class="font-mono text-xs text-zinc-600 tracking-widest uppercase"
+            class="font-mono text-[10px] tracking-[0.22em] text-[var(--muted)]"
             >ESC TO CANCEL</span
           >
         </div>
@@ -30,8 +32,8 @@
             v-model="title"
             ref="inputRef"
             type="text"
-            placeholder="ENTER LOG..."
-            class="w-full bg-transparent border-b border-zinc-700 py-4 font-serif italic text-3xl text-zinc-100 focus:outline-none focus:border-zinc-400 transition-colors uppercase"
+            placeholder="Type and hit Enter..."
+            class="w-full bg-transparent typewriter-border-b pb-2 text-3xl text-[var(--ink)] focus:outline-none placeholder:text-[var(--muted)] placeholder:opacity-50"
             @keyup.enter="submit"
             @keyup.esc="isOpen = false"
           />

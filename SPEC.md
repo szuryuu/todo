@@ -334,7 +334,7 @@ interface PomodoroState {
 
 **Tampilan halaman `/pomodoro`:**
 
-- Besar, terpusat — angka countdown serif besar
+- Besar, terpusat — angka countdown Special Elite besar
 - Di bawah timer: nama task aktif
 - Progress ring (SVG) mengelilingi angka
 - Tombol: Mulai / Pause / Interupsi / Skip Break
@@ -411,42 +411,50 @@ Task dengan `status: 'in-progress'` yang tidak di-update lebih dari 5 hari ditan
 
 ## Design Brief
 
-**Referensi visual**: Editorial motion poster — paper-toned, monospace chrome, serif accent.
-Gunakan `example.html` sebagai panduan utama.
+**Referensi visual**: Typewriter Sheet — kertas ivory lusuh, Special Elite, stempel tinta merah.
+Design concept #06 sebagai panduan utama.
 
 **Palette:**
 
 ```css
---paper: #f3eee5;
---ink: #1a1816;
---muted: #7a766c;
---accent: #c0563b;
---surface: #ede8de;
---serif: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
---mono: ui-monospace, "JetBrains Mono", monospace;
+--paper: #f0e8d4;
+--ink: #1a1408;
+--muted: #9a8868;
+--accent: #be3228;
+--surface: #e8dfc8;
+--typewriter: "Special Elite", cursive;
+--mono: "Courier Prime", "Courier New", monospace;
 ```
 
 **Texture background:**
 
 ```css
 background:
-  radial-gradient(circle, rgba(26, 24, 22, 0.1) 1px, transparent 1.4px) 0 0 /
-    28px 28px,
+  repeating-linear-gradient(
+    transparent,
+    transparent 24px,
+    rgba(100, 80, 50, 0.09) 24px,
+    rgba(100, 80, 50, 0.09) 25px
+  ),
   var(--paper);
 ```
 
 **Typography:**
 
-- Serif italic → headline, judul task, nama kolom, angka countdown Pomodoro
-- Monospace → semua label, badge, timestamp, chrome detail
-- Uppercase + `letter-spacing: 0.18em` → semua label kecil (STALE, HEAVY, LIGHT, HIGH)
+- Special Elite → semua teks konten utama: title task, judul halaman, isi textarea, angka countdown Pomodoro
+- Courier Prime/monospace → semua label, badge, timestamp, stempel, metadata chrome
+- Uppercase + `letter-spacing: 0.22em` → semua label kecil (STALE, HEAVY, LIGHT, HIGH, ACTIVE FILE, INBOX)
+- Hierarki visual bukan dari italic — gunakan ukuran dan opacity sebagai pengganti
 
 **Komponen feel:**
 
-- Border tipis `1px solid rgba(26,24,22,0.15)` — tidak ada shadow
-- Rounded corners minimal
-- Hover: background shift ringan
-- Pomodoro countdown: angka serif besar, progress ring SVG tipis
+- Border tipis `1px solid rgba(26, 20, 8, 0.18)` — tidak ada shadow
+- Rounded corners nol atau minimal (`border-radius: 1px`) — typewriter tidak mengenal sudut tumpul
+- Hover: background shift ringan ke `var(--surface)`
+- Stamp element: border `1.5px solid rgba(190, 50, 40, 0.3)`, warna teks `rgba(190, 50, 40, 0.65)`, rotate `-1.5deg`, uppercase, `letter-spacing: 0.25em` — digunakan untuk status label (ACTIVE FILE, DONE, INBOX)
+- Checkbox task: karakter `[ ]` dan `[x]` dalam monospace, bukan elemen HTML checkbox
+- Done state: `text-decoration: line-through`, warna turun ke `var(--muted)` (`#9a8868`)
+- Footer/metadata halaman: warna `#7a6848`, font mono, rata kanan
 
 ---
 
@@ -488,5 +496,3 @@ GEMINI_API_KEY=
 10. `components/brain/BrainDump.vue`
 11. `pages/someday.vue`
 12. `pages/weekly.vue`
-
----

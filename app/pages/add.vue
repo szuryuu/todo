@@ -1,86 +1,83 @@
 <template>
-  <div class="max-w-2xl mx-auto space-y-8 mt-8">
-    <section class="border-b border-zinc-800 pb-4 sketchy-border">
-      <h1
-        class="text-3xl font-extrabold tracking-tight font-sans text-zinc-100 flex items-center gap-3"
+  <div class="max-w-3xl mx-auto space-y-8 w-full mt-10">
+    <section class="typewriter-border-b pb-6">
+      <p
+        class="font-mono text-xs tracking-[0.22em] text-[var(--muted)] mb-2 uppercase"
       >
-        Deploy New Instruction
-      </h1>
-      <p class="font-hand text-zinc-500 mt-1">
-        Manually insert a node into the system.
+        Manual Entry
       </p>
+      <h1 class="text-4xl text-[var(--ink)] leading-tight">Insert Task</h1>
     </section>
 
-    <div
-      class="border border-zinc-800 bg-zinc-900/20 p-8 sketchy-border space-y-8 relative"
-    >
-      <div class="absolute inset-0 -z-10 bg-zinc-950 opacity-50">
-        <svg width="100%" height="100%" aria-hidden="true">
-          <rect
-            width="100%"
-            height="100%"
-            fill="url(#hand-hatch)"
-            class="sketchy-border"
-          ></rect>
-        </svg>
-      </div>
-
+    <div class="typewriter-border bg-[var(--paper)] p-8 md:p-12 space-y-10">
       <div>
-        <label class="font-mono text-[10px] text-zinc-500 uppercase block mb-2"
-          >Instruction Title</label
+        <label
+          class="font-mono text-xs tracking-[0.22em] text-[var(--muted)] block mb-4 uppercase"
+          >Task Description</label
         >
         <input
           v-model="title"
           ref="titleInput"
           type="text"
-          placeholder="Declare task intent..."
-          class="w-full bg-zinc-950 border border-zinc-700 px-4 py-3 font-sans text-lg text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500 transition-colors sketchy-border"
+          placeholder="What needs to be done?"
+          class="w-full bg-transparent typewriter-border-b pb-3 text-3xl text-[var(--ink)] focus:outline-none placeholder:text-[var(--muted)] placeholder:opacity-50"
           @keyup.enter="handleSubmit"
         />
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
         <div>
           <label
-            class="font-mono text-[10px] text-zinc-500 uppercase block mb-2"
-            >Deadline Constraints</label
+            class="font-mono text-xs tracking-[0.22em] text-[var(--muted)] block mb-4 uppercase"
+            >Deadline</label
           >
           <input
             v-model="dueDate"
             type="date"
-            class="w-full bg-zinc-950 border border-zinc-700 px-4 py-3 font-mono text-sm text-zinc-300 focus:outline-none focus:border-amber-500 transition-colors sketchy-border"
+            class="w-full bg-[var(--surface)] typewriter-border px-4 py-3 font-mono text-sm text-[var(--ink)] focus:outline-none"
           />
         </div>
         <div>
           <label
-            class="font-mono text-[10px] text-zinc-500 uppercase block mb-2"
-            >Priority Level</label
+            class="font-mono text-xs tracking-[0.22em] text-[var(--muted)] block mb-4 uppercase"
+            >Priority</label
           >
           <select
             v-model="priority"
-            class="w-full bg-zinc-950 border border-zinc-700 px-4 py-3 font-mono text-sm text-zinc-300 focus:outline-none focus:border-amber-500 transition-colors uppercase tracking-widest sketchy-border"
+            class="w-full bg-[var(--surface)] typewriter-border px-4 py-3 font-mono text-sm text-[var(--ink)] focus:outline-none tracking-[0.22em] uppercase"
           >
             <option value="low">LOW</option>
             <option value="medium">MEDIUM</option>
             <option value="high">HIGH</option>
           </select>
         </div>
+        <div class="md:col-span-2">
+          <label
+            class="font-mono text-xs tracking-[0.22em] text-[var(--muted)] block mb-4 uppercase"
+            >Energy Required</label
+          >
+          <select
+            v-model="energy"
+            class="w-full bg-[var(--surface)] typewriter-border px-4 py-3 font-mono text-sm text-[var(--ink)] focus:outline-none tracking-[0.22em] uppercase"
+          >
+            <option value="light">LIGHT</option>
+            <option value="heavy">HEAVY</option>
+          </select>
+        </div>
       </div>
 
-      <div
-        class="border-t border-zinc-800 pt-6 flex justify-between items-center sketchy-border"
-      >
+      <div class="typewriter-border-t pt-8 flex justify-between items-center">
         <NuxtLink
           to="/"
-          class="font-hand text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+          class="font-mono text-xs tracking-[0.22em] text-[var(--muted)] hover:text-[var(--ink)] transition-colors"
         >
-          Abort
+          [ ABORT ]
         </NuxtLink>
         <button
           @click="handleSubmit"
-          class="font-hand text-sm bg-amber-500 text-zinc-950 px-8 py-3 font-bold sketchy-border hover:bg-amber-400"
+          class="font-mono text-xs tracking-[0.22em] bg-[var(--ink)] text-[var(--paper)] px-8 py-3 font-bold hover:bg-[var(--accent)] transition-colors"
         >
-          Commit Node
+          COMMIT
         </button>
       </div>
     </div>

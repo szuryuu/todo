@@ -1,96 +1,75 @@
 <template>
-  <div class="space-y-8 h-full flex flex-col">
-    <section
-      class="flex justify-between items-end border-b border-zinc-800 pb-4 sketchy-border"
-    >
+  <div class="flex flex-col flex-1 gap-8">
+    <section class="flex justify-between items-end typewriter-border-b pb-6">
       <div>
-        <h1
-          class="text-3xl font-extrabold tracking-tight font-sans text-zinc-100 flex items-center gap-3"
+        <p
+          class="font-mono text-xs tracking-[0.22em] text-[var(--muted)] mb-2 uppercase"
         >
-          <span
-            class="size-3 bg-amber-500 inline-block rounded-full animate-pulse"
-          ></span>
-          Inbox / Brain Dump
-        </h1>
-        <p class="font-hand text-zinc-500 mt-1">
-          Raw thoughts waiting for triage.
+          Buffer Zone
         </p>
+        <h1 class="text-4xl text-[var(--ink)] leading-tight">Inbox</h1>
       </div>
-      <div
-        class="font-mono text-[11px] text-zinc-400 bg-zinc-900 border border-zinc-800 px-3 py-1 sketchy-border"
-      >
-        Total Captured: {{ store.inboxTasks.length }}
+      <div>
+        <span class="stamp-muted text-[10px]">UNPROCESSED</span>
       </div>
     </section>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start flex-1">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 flex-1 items-start">
       <div
-        class="border border-zinc-800 bg-zinc-900/10 p-6 sketchy-border relative h-full flex flex-col"
+        class="typewriter-border bg-[var(--surface)] p-6 h-full flex flex-col"
       >
-        <div class="absolute inset-0 -z-10 bg-zinc-950">
-          <svg width="100%" height="100%" aria-hidden="true">
-            <rect
-              width="100%"
-              height="100%"
-              fill="url(#hand-hatch)"
-              class="sketchy-border"
-            ></rect>
-          </svg>
-        </div>
         <BrainDump />
       </div>
 
-      <div
-        class="border border-zinc-800 bg-zinc-950 p-6 sketchy-border relative flex flex-col h-full max-h-[800px]"
-      >
+      <div class="flex flex-col h-full gap-6">
         <h3
-          class="font-hand text-lg font-bold text-zinc-200 mb-4 border-b border-zinc-800 pb-2 sketchy-border"
+          class="font-mono text-sm tracking-[0.22em] text-[var(--ink)] typewriter-border-b pb-2 uppercase font-bold"
         >
-          Unprocessed Nodes
+          Captured Items [{{ store.inboxTasks.length }}]
         </h3>
 
-        <div class="flex-1 overflow-y-auto space-y-4 pr-2">
+        <div class="flex-1 overflow-y-auto space-y-6 pr-2">
           <div
             v-for="task in store.inboxTasks"
             :key="task.id"
-            class="border border-zinc-800 bg-zinc-900/40 p-4 sketchy-border hover:border-amber-500/50 transition-colors group"
+            class="typewriter-border p-5 bg-[var(--paper)] hover:bg-[var(--surface)] transition-colors"
           >
-            <div class="flex flex-col gap-2">
-              <span class="font-mono text-[10px] text-zinc-500"
-                >Captured:
-                {{ new Date(task.createdAt).toLocaleDateString() }}</span
-              >
+            <div class="flex justify-between items-start mb-4">
               <span
-                class="font-sans text-sm text-zinc-200 font-medium leading-snug"
-                >{{ task.title }}</span
+                class="font-mono text-[10px] tracking-[0.22em] text-[var(--muted)]"
+                >DATE: {{ new Date(task.createdAt).toLocaleDateString() }}</span
               >
+              <button
+                @click="store.deleteTask(task.id)"
+                class="font-mono text-xs tracking-[0.22em] text-[var(--accent)] hover:underline"
+              >
+                [X]
+              </button>
             </div>
-            <div
-              class="flex gap-3 mt-4 border-t border-zinc-800 pt-3 sketchy-border"
-            >
+
+            <h4 class="text-xl text-[var(--ink)] mb-6">{{ task.title }}</h4>
+
+            <div class="flex flex-wrap gap-4 pt-4 typewriter-border-t">
               <button
                 @click="store.updateTask(task.id, { bucket: 'active' })"
-                class="font-hand text-[10px] bg-amber-500 text-zinc-950 px-3 py-1 font-bold sketchy-border hover:bg-amber-400"
+                class="font-mono text-[10px] tracking-[0.22em] bg-[var(--ink)] text-[var(--paper)] px-3 py-1 font-bold hover:bg-[var(--accent)] transition-colors"
               >
-                Promote Active
+                PROMOTE TO ACTIVE
               </button>
               <button
                 @click="store.updateTask(task.id, { bucket: 'someday' })"
-                class="font-hand text-[10px] text-zinc-400 border border-zinc-700 px-3 py-1 sketchy-border hover:text-zinc-200"
+                class="font-mono text-[10px] tracking-[0.22em] typewriter-border px-3 py-1 text-[var(--ink)] hover:bg-[var(--surface)] transition-colors"
               >
-                Someday
-              </button>
-              <button
-                @click="store.deleteTask(task.id)"
-                class="font-hand text-[10px] text-red-500 hover:text-red-400 ml-auto"
-              >
-                Drop
+                MOVE TO SOMEDAY
               </button>
             </div>
           </div>
 
-          <div v-if="store.inboxTasks.length === 0" class="text-center py-12">
-            <p class="font-hand text-zinc-500">Inbox is completely clear.</p>
+          <div
+            v-if="store.inboxTasks.length === 0"
+            class="text-center py-12 font-mono text-xs tracking-[0.22em] text-[var(--muted)] opacity-70"
+          >
+            [ INBOX IS EMPTY ]
           </div>
         </div>
       </div>

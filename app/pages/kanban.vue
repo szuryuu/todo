@@ -1,95 +1,91 @@
 <template>
-  <div class="space-y-8 h-full flex flex-col">
-    <section
-      class="flex justify-between items-end border-b border-zinc-800 pb-4 sketchy-border"
-    >
+  <div class="flex flex-col flex-1 gap-8">
+    <section class="flex justify-between items-end typewriter-border-b pb-6">
       <div>
-        <h1
-          class="text-3xl font-extrabold tracking-tight font-sans text-zinc-100 flex items-center gap-3"
+        <p
+          class="font-mono text-xs tracking-[0.22em] text-[var(--muted)] mb-2 uppercase"
         >
-          <span
-            class="size-3 bg-amber-500 inline-block rounded-full animate-pulse"
-          ></span>
-          Active Pipelines
-        </h1>
-        <p class="font-hand text-zinc-500 mt-1">
-          Status and progression of active nodes.
+          Active Pipeline
         </p>
+        <h1 class="text-4xl text-[var(--ink)] leading-tight">Kanban Board</h1>
       </div>
-      <div
-        class="font-mono text-[11px] text-zinc-400 bg-zinc-900 border border-zinc-800 px-3 py-1 sketchy-border"
-      >
-        Nodes Allocated: {{ store.activeTasks.length }}
+      <div>
+        <span
+          class="font-mono text-xs tracking-[0.22em] text-[var(--muted)] uppercase"
+          >TOTAL: {{ store.tasks.length }}</span
+        >
       </div>
     </section>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 items-start">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 flex-1 items-start">
       <div
-        v-for="(column, idx) in columns"
+        v-for="column in columns"
         :key="column.status"
         @dragover.prevent
         @drop="handleDrop(column.status)"
-        class="flex flex-col min-h-[600px] border border-zinc-800 bg-zinc-900/10 p-2 sketchy-border relative"
+        class="flex flex-col min-h-[600px] typewriter-border bg-[var(--surface)] p-2"
       >
         <div
-          class="p-3 border-b border-zinc-800 flex justify-between items-center mb-4 sketchy-border bg-zinc-950"
+          class="p-3 typewriter-border-b flex justify-between items-center mb-4 bg-[var(--paper)]"
         >
-          <div class="flex items-center gap-2">
-            <h2 class="font-sans font-bold text-sm text-zinc-200 uppercase">
-              {{ column.name }}
-            </h2>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="font-mono text-[10px] text-zinc-500">
-              {{ store.tasksByStatus(column.status).length }} vol
+          <h2
+            class="font-mono text-sm tracking-[0.22em] text-[var(--ink)] font-bold uppercase"
+          >
+            {{ column.name }}
+          </h2>
+          <div class="flex items-center gap-4">
+            <span
+              class="font-mono text-[10px] text-[var(--muted)] tracking-[0.22em]"
+            >
+              [{{ store.tasksByStatus(column.status).length }}]
             </span>
             <button
               @click="toggleQuickAdd(column.status)"
-              class="font-mono text-xs text-amber-500 border border-amber-500/30 bg-amber-500/10 px-1.5 sketchy-border hover:bg-amber-500 hover:text-zinc-950 transition-colors"
+              class="font-mono text-sm text-[var(--ink)] hover:text-[var(--accent)] transition-colors"
             >
-              +
+              [+]
             </button>
           </div>
         </div>
 
         <div
           v-if="quickAddColumn === column.status"
-          class="mb-4 border border-zinc-700 bg-zinc-900 p-3 sketchy-border"
+          class="mb-4 typewriter-border bg-[var(--paper)] p-4"
         >
           <input
             v-model="quickTitle"
             type="text"
-            placeholder="Initialize instruction..."
-            class="w-full bg-transparent border-b border-zinc-700 pb-2 mb-3 font-sans text-sm text-zinc-200 focus:outline-none focus:border-amber-500 transition-colors"
+            placeholder="Type task..."
+            class="w-full bg-transparent typewriter-border-b pb-2 mb-4 text-lg text-[var(--ink)] focus:outline-none placeholder:text-[var(--muted)]"
             @keyup.enter="submitQuickAdd(column.status)"
           />
           <div class="flex justify-between items-center">
             <select
               v-model="quickPriority"
-              class="bg-zinc-950 font-mono text-[10px] text-zinc-400 border border-zinc-800 px-1 py-0.5 focus:outline-none sketchy-border"
+              class="bg-transparent font-mono text-[10px] tracking-[0.22em] text-[var(--ink)] focus:outline-none uppercase"
             >
               <option value="low">LOW</option>
-              <option value="medium">MED</option>
+              <option value="medium">MEDIUM</option>
               <option value="high">HIGH</option>
             </select>
-            <div class="flex gap-2">
+            <div class="flex gap-4">
               <button
                 @click="quickAddColumn = null"
-                class="font-hand text-[10px] text-zinc-500 hover:text-zinc-300"
+                class="font-mono text-[10px] tracking-[0.22em] text-[var(--muted)]"
               >
-                Abort
+                CANCEL
               </button>
               <button
                 @click="submitQuickAdd(column.status)"
-                class="font-hand text-[10px] bg-amber-500 text-zinc-950 px-2 py-0.5 sketchy-border font-bold hover:bg-amber-400"
+                class="font-mono text-[10px] tracking-[0.22em] bg-[var(--ink)] text-[var(--paper)] px-3 py-1 font-bold"
               >
-                Deploy
+                ADD
               </button>
             </div>
           </div>
         </div>
 
-        <div class="space-y-3 flex-1 overflow-y-auto px-1 pb-4">
+        <div class="space-y-4 flex-1 overflow-y-auto px-1 pb-4">
           <TaskCard
             v-for="task in store.tasksByStatus(column.status)"
             :key="task.id"
@@ -100,9 +96,9 @@
           />
           <div
             v-if="store.tasksByStatus(column.status).length === 0"
-            class="font-hand text-sm text-zinc-600 text-center py-8"
+            class="font-mono text-xs tracking-[0.22em] text-[var(--muted)] text-center py-8 opacity-60"
           >
-            Pipeline stream clear.
+            [ EMPTY ]
           </div>
         </div>
       </div>
@@ -127,9 +123,9 @@ import TaskModal from "~/components/task/TaskModal.vue";
 const store = useTaskStore();
 
 const columns: { name: string; status: TaskStatus }[] = [
-  { name: "Queue", status: "todo" },
-  { name: "Processing", status: "in-progress" },
-  { name: "Resolved", status: "done" },
+  { name: "TODO", status: "todo" },
+  { name: "IN PROGRESS", status: "in-progress" },
+  { name: "DONE", status: "done" },
 ];
 
 const draggedTaskId = ref<string | null>(null);

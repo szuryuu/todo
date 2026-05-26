@@ -1,35 +1,26 @@
 <template>
-  <div class="flex flex-col flex-1">
-    <section class="px-6 py-16 border-b border-zinc-800">
-      <p class="font-mono text-xs text-zinc-600 tracking-widest uppercase mb-6">
-        — PROTOCOL
+  <div class="flex flex-col flex-1 gap-8">
+    <section class="typewriter-border-b pb-6">
+      <p
+        class="font-mono text-xs tracking-[0.22em] text-[var(--muted)] mb-2 uppercase"
+      >
+        Protocol
       </p>
-      <h1 class="font-serif text-5xl text-zinc-100 leading-tight italic">
-        Weekly Review
-      </h1>
+      <h1 class="text-4xl text-[var(--ink)] leading-tight">Weekly Review</h1>
     </section>
 
-    <HatchingDivider label="SYSTEM DIAGNOSTIC" />
-
-    <div
-      class="p-8 flex-1 bg-zinc-950 flex flex-col items-center justify-center"
-    >
+    <div class="flex-1 flex flex-col items-center justify-center p-8">
       <div
-        class="border border-zinc-800 bg-zinc-900 p-8 max-w-lg w-full text-center"
+        class="typewriter-border bg-[var(--surface)] p-12 max-w-lg w-full text-center"
       >
-        <span
-          class="font-mono text-xs text-zinc-500 tracking-widest uppercase mb-4 block"
-          >STATUS: PENDING IMPLEMENTATION</span
+        <span class="stamp-muted text-[10px] mb-6">PENDING MODULE</span>
+        <p
+          class="font-mono text-sm text-[var(--ink)] leading-relaxed uppercase mt-4"
         >
-        <p class="font-mono text-sm text-zinc-400 leading-relaxed uppercase">
-          WEEKLY REVIEW COMPILATION MATRIX WILL BE IMPLEMENTED IN ITERATION 3.
-          ENSURE ALL STATES ARE RESOLVED BEFORE INITIATING PROTOCOL.
+          REVIEW COMPILATION MATRIX WILL BE IMPLEMENTED IN THE NEXT ITERATION.
+          PLEASE PROCESS INBOX AND SOMEDAY MANUALLY FOR NOW.
         </p>
       </div>
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import HatchingDivider from "~/components/layout/HatchingDivider.vue";
-</script>
