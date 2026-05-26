@@ -1,58 +1,30 @@
-@import url("https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
 
 @theme {
-  --font-hand: "Kalam", cursive;
-}
-
-:root {
-  --paper: #fdfbf7;
-  --ink: #2b2e35;
-  --muted: #6b7280;
-  --accent: #e11d48;
-  --highlight: rgba(253, 224, 71, 0.6);
+  --font-hand: "Architects Daughter", cursive;
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 }
 
 body {
-  background-color: var(--paper);
-  color: var(--ink);
-  font-family: var(--font-hand);
+  background-color: theme("colors.zinc.950");
+  color: theme("colors.zinc.100");
+  font-family: var(--font-sans);
   margin: 0;
   min-height: 100vh;
-  font-size: 1.25rem;
-  line-height: 32px;
-  background-image: repeating-linear-gradient(
-    transparent,
-    transparent 31px,
-    rgba(0, 0, 0, 0.08) 31px,
-    rgba(0, 0, 0, 0.08) 32px
-  );
-  background-attachment: local;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-weight: 700;
-  line-height: 1.2;
+.font-hand {
+  font-family: var(--font-hand);
+}
+.font-sans {
+  font-family: var(--font-sans);
+}
+.font-mono {
+  font-family: var(--font-mono);
 }
 
 .sketchy-border {
-  border: 2px solid var(--ink);
-  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
-}
-
-.sketchy-box {
-  border: 2px solid var(--ink);
-  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
-  box-shadow: 4px 4px 0px 0px rgba(43, 46, 53, 0.9);
-  background-color: var(--paper);
-}
-
-.sketchy-box:active:not(:disabled) {
-  box-shadow: 1px 1px 0px 0px rgba(43, 46, 53, 0.9);
-  transform: translateY(3px) translateX(3px);
+  filter: url(#handwritten-distortion);
 }

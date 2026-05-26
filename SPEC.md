@@ -9,17 +9,17 @@
 
 - **Framework**: Nuxt 4 (latest), dengan `compatibilityVersion: 4` di `nuxt.config.ts`
 - **Runtime**: Bun
-- **Styling**: Tailwind CSS v4 (via `@nuxtjs/tailwindcss` atau native Nuxt module)
-- **State**: Pinia (`@pinia/nuxt`)
-- **AI**: Google Gemini API (`gemini-2.0-flash`, free tier) via `$fetch` di Nuxt server route
-- **Icons**: `@iconify/vue` atau `lucide-vue-next`
-- **Persistence**: `localStorage` via Pinia plugin (`pinia-plugin-persistedstate`)
+- **Styling**: Tailwind CSS v4 (via `@tailwindcss/vite`)
+- **State**: Pinia (`@pinia/nuxt`) + `@pinia-plugin-persistedstate/nuxt`
+- **AI**: Google Gemini API (`gemini-2.0-flash`, free tier) via Nuxt server route
+- **Icons**: `lucide-vue-next`
+- **Persistence**: localStorage via pinia-plugin-persistedstate
 
 ```bash
 bun create nuxt@latest todo-app
 cd todo-app
-bun add @pinia/nuxt pinia-plugin-persistedstate lucide-vue-next
-bun add -d @nuxtjs/tailwindcss
+bun add @pinia/nuxt @pinia-plugin-persistedstate/nuxt lucide-vue-next
+bun add -d @tailwindcss/vite tailwindcss
 ```
 
 ---
@@ -29,29 +29,38 @@ bun add -d @nuxtjs/tailwindcss
 ```
 app/
 ├── pages/
-│   ├── index.vue          ← Dashboard
-│   └── kanban.vue         ← Kanban board
+│   ├── index.vue              ← Dashboard + Daily Focus
+│   ├── kanban.vue             ← Kanban board
+│   ├── inbox.vue              ← Inbox (hasil Brain Dump)
+│   ├── someday.vue            ← Someday / Mau Coba
+│   ├── weekly.vue             ← Weekly Review
+│   └── pomodoro.vue           ← Pomodoro timer
 ├── components/
 │   ├── task/
 │   │   ├── TaskCard.vue
 │   │   ├── TaskModal.vue
 │   │   └── TaskBadge.vue
-│   ├── dashboard/
-│   │   ├── StatCard.vue
-│   │   └── ActivityChart.vue
-│   └── brain/
-│       └── BrainDump.vue  ← Fitur AI textarea
+│   ├── brain/
+│   │   └── BrainDump.vue
+│   ├── pomodoro/
+│   │   └── PomodoroTimer.vue
+│   └── layout/
+│       └── QuickCapture.vue   ← floating input, muncul di semua halaman
 ├── composables/
 │   ├── useTask.ts
-│   └── useBrainDump.ts
+│   ├── useBrainDump.ts
+│   └── usePomodoro.ts
 ├── stores/
-│   └── task.ts            ← Pinia store
-└── types/
-    └── task.ts            ← Type definitions
+│   ├── task.ts
+│   └── pomodoro.ts
+├── types/
+│   └── task.ts
+└── utils/
+    └── constants.ts           ← POMODORO_WORK_MINUTES, dll
 
 server/
 └── api/
-    └── parse-tasks.post.ts ← Gemini API call (key tidak expose ke client)
+    └── parse-tasks.post.ts
 ```
 
 ---
@@ -61,20 +70,39 @@ server/
 ```typescript
 // types/task.ts
 
-type TaskStatus = "todo" | "in-progress" | "done";
-type TaskPriority = "low" | "medium" | "high";
+export type TaskStatus = "todo" | "in-progress" | "done";
+export type TaskPriority = "low" | "medium" | "high";
+export type TaskEnergy = "light" | "heavy";
+export type TaskBucket = "active" | "inbox" | "someday";
 
-interface Task {
+export interface Task {
   id: string; // crypto.randomUUID()
   title: string;
-  description?: string;
+  nextAction?: string; // "langkah konkret berikutnya"
   status: TaskStatus;
   priority: TaskPriority;
-  dueDate?: string; // ISO date string, nullable
+  energy: TaskEnergy; // light = bisa dikerjakan saat lelah
+  bucket: TaskBucket; // active | inbox | someday
+  dueDate?: string | null; // ISO date YYYY-MM-DD
   tags?: string[];
-  createdAt: string; // ISO datetime
-  updatedAt: string; // ISO datetime
-  completedAt?: string; // ISO datetime, set saat status → done
+  pomodoroCount: number; // berapa sesi pomodoro sudah dijalankan untuk task ini
+  staleSince?: string; // ISO datetime, di-set saat masuk in-progress
+  createdAt: string;
+  updatedAt: string;
+  completedAt?: string;
+}
+
+export interface DailyNote {
+  date: string; // YYYY-MM-DD
+  focus: string; // "hari ini saya fokus ke..."
+}
+
+export interface PomodoroSession {
+  id: string;
+  taskId: string;
+  startedAt: string;
+  completedAt?: string;
+  interrupted: boolean;
 }
 ```
 
@@ -82,97 +110,266 @@ interface Task {
 
 ## Fitur
 
-### 1. Dashboard (`/`)
+### 1. Brain Dump → Inbox
 
-Tampilkan ringkasan keadaan saat ini. Bukan laporan — ini command center harian.
-
-**Konten:**
-
-- **Header**: greeting dinamis (pagi/siang/malam) + tanggal hari ini
-- **Stat cards** (4 buah):
-  - Total task aktif (todo + in-progress)
-  - Task jatuh tempo hari ini
-  - Task selesai minggu ini
-  - Task overdue (due date sudah lewat, belum done)
-- **Due Today list**: card task yang due hari ini, bisa langsung toggle status
-- **Quick Add**: input singkat untuk tambah task cepat (title + due date + priority, tanpa buka modal)
-- **Brain Dump shortcut**: tombol menuju atau membuka panel Brain Dump
-
-**Catatan implementasi:**
-
-- Semua data dari Pinia store, computed via `computed()` — tidak ada logic di template
-- Tanggal dihitung relatif terhadap `new Date()` saat render
-- Overdue hanya untuk task yang belum `done`
-
----
-
-### 2. Kanban Board (`/kanban`)
-
-Tiga kolom: **Todo** | **In Progress** | **Done**
-
-**Fitur kolom:**
-
-- Jumlah task per kolom ditampilkan di header kolom
-- Drag and drop antar kolom untuk ubah status (gunakan native HTML5 drag API atau `@vueuse/integrations` — tidak perlu library berat)
-- Tombol `+` di setiap kolom untuk tambah task langsung ke kolom tersebut
-
-**Task card menampilkan:**
-
-- Title
-- Priority badge (color-coded: low/medium/high)
-- Due date (merah jika overdue)
-- Tags (jika ada)
-- Tombol hapus (confirm dulu)
-
-**Task modal (buka saat klik card):**
-
-- Edit semua field: title, description, status, priority, due date, tags
-- Timestamps (createdAt, updatedAt) ditampilkan sebagai info, tidak bisa diedit
-- Tombol "Mark as Done" shortcut
-
----
-
-### 3. Brain Dump (komponen `BrainDump.vue`)
-
-Ini fitur inti. Satu textarea besar, ketik semua yang ada di pikiran, AI yang memisahkan.
+Fitur paling penting. Satu textarea besar, ketik semua yang ada di pikiran, AI yang memecah.
 
 **Flow:**
 
-1. User membuka panel Brain Dump (bisa dari dashboard atau floating button)
-2. Textarea besar muncul — placeholder: _"Tulis semua yang ada di pikiranmu..."_
-3. User mengetik bebas, contoh:
-   ```
-   besok harus beli bahan makanan sama belajar nuxt kayaknya,
-   juga ada deadline tugas desain hari jumat, dan jangan lupa
-   balas email pak budi yang udah nunggu dari kemarin
-   ```
-4. Klik tombol **"Pisahkan"**
-5. Request ke `/api/parse-tasks` (server route) — kirim teks mentah
-6. Server memanggil Gemini API dengan prompt yang sudah diformat
-7. Response: array task terstruktur dikembalikan ke client
-8. UI menampilkan preview task hasil parsing — user bisa **edit judul**, **ubah priority**, **set due date**, atau **hapus** sebelum konfirmasi
-9. Klik **"Tambahkan ke Board"** → task masuk ke store, panel tertutup
+1. User buka halaman Brain Dump atau tekan shortcut global
+2. Textarea besar — placeholder: _"Tulis semua yang ada di pikiranmu..."_
+3. Klik **"Pisahkan"** → request ke `/api/parse-tasks`
+4. Gemini memecah teks menjadi array task terstruktur
+5. Preview muncul — user bisa edit judul, ubah priority, set energy, hapus
+6. Klik **"Kirim ke Inbox"** → semua masuk ke `bucket: 'inbox'`, panel tutup
 
-**Server route (`/api/parse-tasks.post.ts`):**
+**Gemini prompt (di server route):**
 
-```typescript
-// Prompt ke Gemini:
-// "Kamu adalah asisten produktivitas.
-//  Dari teks berikut, ekstrak daftar task yang perlu dilakukan.
-//  Kembalikan HANYA JSON array dengan format:
-//  [{ title: string, priority: 'low'|'medium'|'high', dueDate: string|null }]
-//  Tentukan priority dari konteks (deadline = high, 'besok' = medium, dll).
-//  dueDate dalam format YYYY-MM-DD jika ada petunjuk waktu, null jika tidak ada.
-//  Teks: {userInput}"
-
-// Response Gemini di-parse, validasi strukturnya, lalu return ke client.
-// API key dibaca dari process.env.GEMINI_API_KEY — tidak pernah expose ke client.
+```
+Kamu adalah asisten produktivitas.
+Dari teks berikut, ekstrak daftar task yang perlu dilakukan.
+Kembalikan HANYA JSON array:
+[{ "title": string, "priority": "low"|"medium"|"high", "energy": "light"|"heavy", "dueDate": "YYYY-MM-DD"|null }]
+- priority: deadline eksplisit = high, "besok/segera" = medium, sisanya = low
+- energy: butuh konsentrasi tinggi = heavy, bisa sambil santai = light
+- dueDate: isi jika ada petunjuk waktu spesifik, null jika tidak ada
+Teks: {userInput}
 ```
 
 **Error handling:**
 
-- Gemini gagal → tampilkan pesan error, textarea tetap terisi (tidak hilang)
-- Response bukan valid JSON → fallback: buat satu task dengan title = seluruh teks
+- Gemini gagal → error message, textarea tidak dikosongkan
+- Response bukan valid JSON → fallback: satu task dengan title = seluruh teks
+
+---
+
+### 2. Inbox (`/inbox`)
+
+Buffer antara pikiran mentah dan komitmen nyata. Semua hasil Brain Dump masuk sini.
+
+**Tampilan:** daftar sederhana, urutan terbaru di atas.
+
+**Aksi per item:**
+
+- **Promosikan ke Active** → pindah ke kanban, status `todo`, bucket `active`
+- **Pindah ke Someday** → bucket `someday`
+- **Hapus** — confirm dulu
+
+**Aturan:** tidak ada due date, tidak ada priority enforcement di Inbox. Keputusan dibuat saat promosi.
+
+---
+
+### 3. Kanban Board (`/kanban`) — Active Tasks
+
+Tiga kolom: **Todo** | **In Progress** | **Done**
+
+Hanya menampilkan task dengan `bucket: 'active'`.
+
+**Fitur kolom:**
+
+- Jumlah task per kolom di header
+- Drag and drop antar kolom (native HTML5 drag API)
+- Tombol `+` untuk quick add langsung ke kolom
+
+**Task card menampilkan:**
+
+- Title + nextAction (jika ada)
+- Priority badge + Energy badge (`LIGHT` / `HEAVY` — monospace uppercase)
+- Due date — merah jika overdue
+- Staleness warning: jika task sudah `in-progress` lebih dari 5 hari, tampilkan label `STALE · N DAYS` dalam warna muted
+- Jumlah pomodoro selesai (`🍅 ×3`)
+- Tombol start pomodoro langsung dari card
+
+**Task modal:**
+
+- Edit semua field termasuk `nextAction` dan `energy`
+- Timestamps sebagai info, tidak bisa diedit
+- Tombol "Mark as Done" shortcut
+
+---
+
+### 4. Inbox Buffer
+
+Sudah dijelaskan di fitur 1. Poin kunci:
+
+- Task di Inbox **tidak masuk kanban**
+- Tidak ada pressure — ini tempat parkir, bukan komitmen
+- User buka Inbox saat ada waktu untuk "triage" pikiran yang sudah di-dump
+
+---
+
+### 5. Daily Focus — Maks 3 Task (`/` dashboard)
+
+Setiap hari, pilih maksimal 3 task dari Active yang mau dikerjakan hari ini.
+
+**Implementasi:**
+
+- Field boolean `isFocusToday` di Task — di-reset otomatis tiap ganti hari (cek tanggal di store action)
+- Dashboard menampilkan 3 slot Focus — jika belum dipilih, tampilkan prompt "Pilih task untuk hari ini"
+- User pilih dari daftar Active tasks
+- Task focus ditampilkan paling atas, bisa langsung start Pomodoro
+
+**Aturan:** tidak bisa pilih lebih dari 3. Jika mau ganti, harus unset dulu yang lama.
+
+---
+
+### 6. Quick Capture (global)
+
+Shortcut `Ctrl+Space` atau tombol floating `+` di pojok kanan bawah semua halaman.
+
+**Behavior:**
+
+- Muncul input sederhana: judul saja
+- Enter → langsung masuk `bucket: 'inbox'`, status `todo`, priority `medium`, energy `light`
+- Tidak ada modal, tidak ada navigasi — capture cepat, lanjut kerja
+
+**Komponen:** `QuickCapture.vue` di `app.vue`, selalu mount.
+
+---
+
+### 7. Next Action per Task
+
+Field `nextAction` — satu kalimat: langkah konkret paling kecil berikutnya.
+
+**Contoh:**
+
+- Title: "Belajar Nuxt" → nextAction: "Selesaikan chapter routing dulu"
+- Title: "Buat CV" → nextAction: "Cari template, pilih satu"
+
+**Tampilan:** di bawah title di task card, font muted, italic. Di modal bisa diedit.
+
+Opsional saat create, tapi dianjurkan. Jika kosong, task card tetap valid.
+
+---
+
+### 8. Someday (`/someday`)
+
+Keinginan dan aspirasi yang belum jadi komitmen.
+
+**Tampilan:** grid sederhana, seperti sticky notes.
+
+**Setiap item hanya punya:** title, catatan singkat (opsional), tanggal ditambahkan.
+
+**Tidak ada:** due date, priority, status, kanban.
+
+**Aksi:** promosikan ke Active (masuk Inbox dulu untuk triage), atau hapus.
+
+**Diakses saat Weekly Review** untuk mempertimbangkan apa yang mau dipromosikan.
+
+---
+
+### 9. Weekly Review (`/weekly`)
+
+Ritual mingguan, bukan dashboard. Muncul sebagai halaman khusus.
+
+**Konten (dibagi tiga bagian):**
+
+**Bagian 1 — Minggu lalu:**
+
+- Berapa task selesai
+- Task yang masih stuck di in-progress (overdue atau stale)
+- Daily notes dari 7 hari terakhir
+
+**Bagian 2 — Inbox & Someday triage:**
+
+- Daftar semua item di Inbox yang belum diproses
+- Daftar Someday — pilih mana yang mau dipromosikan ke Active minggu ini
+
+**Bagian 3 — Minggu ini:**
+
+- Input: "Minggu ini saya ingin fokus ke..." (satu kalimat)
+- Konfirmasi task Active yang akan dibawa ke minggu ini
+
+**Tidak ada chart.** Hanya teks dan aksi.
+
+---
+
+### 10. Energy Level per Task
+
+Field `energy: 'light' | 'heavy'` di setiap task.
+
+- `heavy` — butuh konsentrasi penuh, kondisi mental prima
+- `light` — bisa dikerjakan saat lelah, tidak butuh fokus tinggi
+
+**Tampilan di kanban:** badge kecil `HEAVY` atau `LIGHT` — monospace uppercase, warna berbeda.
+
+**Manfaat:** saat tidak produktif, filter kanban untuk tampilkan hanya task `light`. Tidak ada fitur filter eksplisit di V1 — cukup user sadar badge ini saat memilih task.
+
+---
+
+### 11. Pomodoro Timer (`/pomodoro`)
+
+Timer yang terikat ke task spesifik, bukan standalone countdown.
+
+**Konstanta (di `utils/constants.ts`):**
+
+```typescript
+export const POMODORO_WORK_MINUTES = 25;
+export const POMODORO_SHORT_BREAK_MINUTES = 5;
+export const POMODORO_LONG_BREAK_MINUTES = 15;
+export const POMODORO_SESSIONS_BEFORE_LONG_BREAK = 4;
+```
+
+**Flow:**
+
+1. User pilih task dari daftar Active (atau dari Daily Focus)
+2. Timer menampilkan countdown 25:00
+3. Klik **"Mulai"** → timer berjalan, tab title berubah: `"25:00 — Belajar Nuxt"`
+4. Selesai → notifikasi browser (`Notification API`), sesi dicatat ke `PomodoroSession`
+5. `pomodoroCount` di task bertambah +1
+6. Otomatis masuk fase break (5 menit atau 15 menit setelah 4 sesi)
+7. Klik **"Interupsi"** → sesi dicatat sebagai `interrupted: true`, timer reset
+
+**State (Pinia store `pomodoro.ts`):**
+
+```typescript
+interface PomodoroState {
+  activeTaskId: string | null;
+  phase: "work" | "short-break" | "long-break" | "idle";
+  secondsLeft: number;
+  sessionCount: number; // sesi work berturut-turut
+  sessions: PomodoroSession[];
+}
+```
+
+**Tampilan halaman `/pomodoro`:**
+
+- Besar, terpusat — angka countdown serif besar
+- Di bawah timer: nama task aktif
+- Progress ring (SVG) mengelilingi angka
+- Tombol: Mulai / Pause / Interupsi / Skip Break
+- Riwayat sesi hari ini di bawah (list sederhana)
+
+**Di task card:** badge `🍅 ×N` menunjukkan total sesi selesai. Tombol ▶ start langsung dari card → navigate ke `/pomodoro` dengan task sudah terpilih.
+
+**Timer tetap berjalan saat navigasi halaman lain** — state di Pinia, countdown via `setInterval` di composable `usePomodoro.ts`. Tab title terus update.
+
+---
+
+## Daily Note
+
+Field sederhana di dashboard, satu per hari.
+
+**Tampilan:** di bawah Daily Focus, satu input text.
+
+- Placeholder: _"Hari ini saya fokus ke..."_
+- Auto-save saat blur
+- Disimpan di store terpisah atau sebagai array `DailyNote[]` di task store
+
+Digunakan di Weekly Review untuk melihat pattern minggu lalu.
+
+---
+
+## Staleness Indicator
+
+Task dengan `status: 'in-progress'` yang tidak di-update lebih dari 5 hari ditandai otomatis.
+
+**Implementasi:**
+
+- `staleSince` di-set saat task pertama kali pindah ke `in-progress`
+- Getter di store menghitung selisih hari dari `staleSince` ke `now`
+- Jika > 5 hari: task card menampilkan label `STALE · 7 DAYS` (mono, muted, warna warning)
+- Tidak ada pop-up, tidak ada notifikasi — hanya visual di card
 
 ---
 
@@ -180,60 +377,56 @@ Ini fitur inti. Satu textarea besar, ketik semua yang ada di pikiran, AI yang me
 
 ### Nuxt 4 Specifics
 
-- Gunakan `app/` directory (Nuxt 4 default, bukan `src/`)
-- `useAsyncData` atau `useFetch` untuk semua data fetching — tidak ada `axios`
-- Auto-imports aktif — tidak perlu manual import `ref`, `computed`, `useFetch`
-- Server routes di `server/api/` — logic AI **wajib** di sini, bukan di composable client-side
+- Gunakan `app/` directory
+- Auto-imports aktif — tidak perlu manual import `ref`, `computed`
+- Server routes di `server/api/` — Gemini API call wajib di sini
+- `useAsyncData` / `useFetch` untuk fetching, tidak ada axios
 
 ### State Management
 
-- Satu store: `stores/task.ts` via Pinia
-- Store hanya berisi: state, getters (computed), actions
-- Tidak ada business logic di komponen — semua lewat composable atau store action
-- `pinia-plugin-persistedstate` untuk sync ke localStorage otomatis
+- Store terpisah: `task.ts` dan `pomodoro.ts`
+- Store hanya berisi state, getters, actions — tidak ada UI logic
+- Business logic di composable, bukan di komponen
 
 ### Komponen
 
-- Setiap komponen satu tanggung jawab
-- Props selalu di-type dengan TypeScript interface
-- Emit events didefinisikan eksplisit dengan `defineEmits<{ ... }>()`
-- Tidak ada logic kompleks di template — pindahkan ke `computed()` atau method
+- Satu komponen, satu tanggung jawab
+- Props di-type eksplisit dengan TypeScript interface
+- `defineEmits<{ ... }>()` eksplisit
+- Tidak ada logic kompleks di template
 
 ### TypeScript
 
-- Strict mode aktif di `tsconfig.json`
-- Tidak ada `any` kecuali terpaksa dan diberi komentar alasannya
-- Semua type di `types/task.ts`, diimport sesuai kebutuhan
+- Strict mode aktif
+- Tidak ada `any`
+- Semua type di `types/task.ts`
 
 ### Lain-lain
 
-- Tidak ada komentar inline — nama variabel dan fungsi harus self-explanatory
-- Fungsi maksimal melakukan satu hal
-- Magic number/string → extract ke konstanta di `utils/` atau top of file
-- `.env` untuk API key, `.env.example` disertakan, `.env` di `.gitignore`
+- Tidak ada komentar inline
+- Magic number/string → `utils/constants.ts`
+- `.env` untuk API key, tidak pernah expose ke client
 
 ---
 
-## Design Brief (untuk generate UI)
+## Design Brief
 
 **Referensi visual**: Editorial motion poster — paper-toned, monospace chrome, serif accent.
-Lihat `example.html` sebagai panduan estetik utama. Bukan dark dashboard, bukan SaaS modern.
+Gunakan `example.html` sebagai panduan utama.
 
-**Aesthetic**: Editorial / archival — seperti majalah cetak yang didigitalisasi. Restrained, typographic-first, tidak ada elemen dekoratif berlebihan. Terasa personal dan intentional.
-
-**Palette (CSS variables):**
+**Palette:**
 
 ```css
---paper: #f3eee5; /* background utama */
---ink: #1a1816; /* teks, border */
---muted: #7a766c; /* label, timestamp, dimmed */
---accent: #c0563b; /* action utama, overdue, high priority */
---surface: #ede8de; /* card/surface sedikit lebih gelap dari paper */
+--paper: #f3eee5;
+--ink: #1a1816;
+--muted: #7a766c;
+--accent: #c0563b;
+--surface: #ede8de;
 --serif: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
 --mono: ui-monospace, "JetBrains Mono", monospace;
 ```
 
-**Texture**: Dotted grid di background via CSS:
+**Texture background:**
 
 ```css
 background:
@@ -242,36 +435,30 @@ background:
   var(--paper);
 ```
 
-**Typography**:
+**Typography:**
 
-- Serif italic untuk headline, judul task, nama kolom kanban
-- Monospace untuk semua label, badge, timestamp, chrome detail, status
-- Uppercase + `letter-spacing: 0.18em` untuk semua label kecil
+- Serif italic → headline, judul task, nama kolom, angka countdown Pomodoro
+- Monospace → semua label, badge, timestamp, chrome detail
+- Uppercase + `letter-spacing: 0.18em` → semua label kecil (STALE, HEAVY, LIGHT, HIGH)
 
-**Chrome detail** (ikuti pattern example.html):
-
-- Corner labels: top-left app name + tanggal, top-right context info
-- Thin baseline rule (`1px solid rgba(26,24,22,0.25)`) sebagai separator
-- Stat card menggunakan angka besar serif italic + label mono di bawahnya
-
-**Komponen feel**:
+**Komponen feel:**
 
 - Border tipis `1px solid rgba(26,24,22,0.15)` — tidak ada shadow
-- Rounded corners minimal atau tidak sama sekali
-- Priority badge: monospace uppercase, background subtle, accent color untuk high
-- Hover state: background shift ringan, bukan shadow atau lift effect
-- Tidak ada icon berlebihan — teks dan tipografi yang bicara
+- Rounded corners minimal
+- Hover: background shift ringan
+- Pomodoro countdown: angka serif besar, progress ring SVG tipis
 
 ---
 
 ## Out of Scope (Prototype)
 
-- Authentication — tidak ada
-- Backend/database — semua localStorage
-- Notifikasi/reminder — tidak ada
-- Recurring task — tidak ada
-- Multi-user — tidak ada
-- Mobile responsiveness — desktop first, mobile belakangan
+- Authentication
+- Backend / database — semua localStorage
+- Push notification / reminder
+- Recurring task
+- Multi-user
+- Mobile responsiveness — desktop first
+- Analytics / chart
 
 ---
 
@@ -284,3 +471,22 @@ GEMINI_API_KEY=your_key_here
 # .env.example
 GEMINI_API_KEY=
 ```
+
+---
+
+## Urutan Build yang Disarankan
+
+1. `types/task.ts` + `utils/constants.ts`
+2. `stores/task.ts` + `stores/pomodoro.ts`
+3. `composables/useTask.ts` + `composables/usePomodoro.ts`
+4. `server/api/parse-tasks.post.ts`
+5. `components/layout/QuickCapture.vue` + `app.vue`
+6. `pages/inbox.vue`
+7. `pages/kanban.vue` + TaskCard + TaskModal
+8. `pages/index.vue` (Dashboard + Daily Focus)
+9. `pages/pomodoro.vue` + PomodoroTimer
+10. `components/brain/BrainDump.vue`
+11. `pages/someday.vue`
+12. `pages/weekly.vue`
+
+---
